@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="193px" preserveAspectRatio="none" style="width:386px;height:193px;background:#FFFFFF;" version="1.1" viewBox="0 0 386 193" width="386px" zoomAndPan="magnify"><defs><filter height="300%" id="fjpdyku538iu0" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[b1435b213846e3ddcd1e6c1cd6b83b9a]
+entity Server--><ellipse cx="74.5" cy="14" fill="#FEFECE" filter="url(#fjpdyku538iu0)" rx="8" ry="8" style="stroke:#A80036;stroke-width:1.5;"/><path d="M74.5,22 L74.5,49 M61.5,30 L87.5,30 M74.5,49 L61.5,64 M74.5,49 L87.5,64 " fill="none" filter="url(#fjpdyku538iu0)" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="42" x="53.5" y="84.0332">Server</text><!--MD5=[0ba5ee7700168656dc1b457c6fe9fdac]
+entity Client--><ellipse cx="304.5" cy="14" fill="#FEFECE" filter="url(#fjpdyku538iu0)" rx="8" ry="8" style="stroke:#A80036;stroke-width:1.5;"/><path d="M304.5,22 L304.5,49 M291.5,30 L317.5,30 M304.5,49 L291.5,64 M304.5,49 L317.5,64 " fill="none" filter="url(#fjpdyku538iu0)" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="36" x="286.5" y="84.0332">Client</text><ellipse cx="74.4277" cy="165.0855" fill="#FEFECE" filter="url(#fjpdyku538iu0)" rx="68.4277" ry="16.0855" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="83" x="29.9277" y="169.6021">Recieve data</text><ellipse cx="304.3041" cy="164.8608" fill="#FEFECE" filter="url(#fjpdyku538iu0)" rx="69.8041" ry="16.3608" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="87" x="257.8041" y="169.3774">Transmit data</text><!--MD5=[7dc8752a7ec849cfc57d8d20466fa478]
+link Server to rx_data--><path d="M74.5,87.59 C74.5,103.43 74.5,121.21 74.5,135.63 " fill="none" id="Server-to-rx_data" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="74.5,148.73,78.5,142.73,74.5,136.73,70.5,142.73,74.5,148.73" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[39576697a03300fb65653e4771ba9fd3]
+link Client to tx_data--><path d="M304.5,87.59 C304.5,103.33 304.5,120.99 304.5,135.36 " fill="none" id="Client-to-tx_data" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="304.5,148.44,308.5,142.44,304.5,136.44,300.5,142.44,304.5,148.44" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[12c569b13109240eee676e2f6cc7dd88]
+link Server to Client--><path d="M95.73,46 C138.79,46 236.15,46 281.03,46 " fill="none" id="Server-to-Client" style="stroke:#008000;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#008000" points="286.24,46,277.24,42,281.24,46,277.24,50,286.24,46" style="stroke:#008000;stroke-width:1.0;"/><text fill="#008000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="154" x="114" y="39.4951">Transmit the encoded data</text><!--MD5=[279a29a2c0bb102ff85031576c28b829]
+@startuml use_cases_1
+
+:Server:
+:Client:
+
+(Recieve data) as rx_data
+(Transmit data) as tx_data
+
+Server - -* rx_data
+Client - -* tx_data
+Server -> Client #green;line.dashed;text:green : Transmit the encoded data
+
+@enduml
+
+PlantUML version 1.2021.10(Mon Aug 30 15:43:48 CEST 2021)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: Cp1252
+Language: en
+Country: US
+--></g></svg>
