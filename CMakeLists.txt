@@ -3,20 +3,21 @@
 # Initial defs
 ############################################################
 cmake_minimum_required(VERSION 3.16) # CMake version check
-project(szs_datastransport VERSION 0.0.1) # Create project "szs_datastransport"
+project(szs_datatransport VERSION 0.0.1) # Create project "szs_datastransport"
 
 ############################################################
 # Create a library
 ############################################################
 
 #Generate the static library from the library sources
-add_library(szs_datastransport SHARED
-        dataTransport.cpp
+add_library(szs_datatransport INTERFACE)
+
+target_include_directories(szs_datatransport INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
         )
 
-target_include_directories(szs_datastransport
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
+target_sources(szs_datatransport INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/dataTransport.cpp
         )
 
 add_subdirectory(tests)
