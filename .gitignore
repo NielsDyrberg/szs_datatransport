@@ -4,5 +4,3 @@
 **.pyc
 *.DS_Store
 **/cmake-build*/*
-**/deps/*
-**/tests/*
