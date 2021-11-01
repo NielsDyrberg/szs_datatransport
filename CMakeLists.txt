@@ -11,6 +11,10 @@ project(szs_datatransport VERSION 0.0.1) # Create project "szs_datastransport"
 
 #Generate the static library from the library sources
 add_library(szs_datatransport INTERFACE)
+        src/dataTransport.cpp
+        src/server.cpp
+        src/client.cpp
+        )
 
 target_include_directories(szs_datatransport INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/include

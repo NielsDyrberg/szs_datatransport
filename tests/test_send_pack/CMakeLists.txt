@@ -12,6 +12,6 @@ set(${PROJECT_NAME} test_send_pack.cpp)
 add_executable(${PROJECT_NAME} test_send_pack.cpp)
 
 # Link libraries to project
-target_link_libraries(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} szs_datastransport)
 
 
