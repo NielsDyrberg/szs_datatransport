@@ -17,7 +17,29 @@
  * Public methods
  **********************************************************************************************************************/
 
+DataTransport::DataTransport() {
+    this->buffer_len = BUFFER_LEN;
+    this->dst_hostname = nullptr;
+    this->dst_ip = nullptr;
+    this->port = PORT;
+    this->is_ip = false;
+
+    this->src_addr = {};
+    this->src_storage = {};
+    this->src_addr_size = {};
+    this->src_s = socket(AF_INET, SOCK_TYPE, 0);
+
+    this->dst_addr = {};
+    this->dst_storage = {};
+    this->dst_addr_size = {};
+    this->dst_s = socket(AF_INET, SOCK_TYPE, 0);
+
+    this->portOpen = false;
+    this->connected = false;
+}
+
 DataTransport::DataTransport(char* host, bool is_ip) {
+    this->buffer_len = BUFFER_LEN;
     this->port = PORT;
     this->is_ip = is_ip;
     this->dst_hostname = nullptr;
@@ -40,6 +62,7 @@ DataTransport::DataTransport(char* host, bool is_ip) {
 }
 
 DataTransport::DataTransport(char *host, unsigned int port, bool is_ip) {
+    this->buffer_len = BUFFER_LEN;
     this->port = port;
     this->is_ip = is_ip;
     this->dst_hostname = nullptr;
@@ -62,6 +85,7 @@ DataTransport::DataTransport(char *host, unsigned int port, bool is_ip) {
 }
 
 DataTransport::DataTransport(unsigned int port, unsigned char addr_family, unsigned  char socket_type){
+    this->buffer_len = BUFFER_LEN;
     this->dst_hostname = nullptr;
     this->dst_ip = nullptr;
     this->port = port;

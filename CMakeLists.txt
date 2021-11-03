@@ -3,7 +3,7 @@
 # Initial defs
 ############################################################
 cmake_minimum_required(VERSION 3.16) # CMake version check
-project(szs_datatransport VERSION 0.0.2) # Create project "szs_datastransport"
+project(szs_datatransport VERSION 0.0.3) # Create project "szs_datastransport"
 
 ############################################################
 # Create a library

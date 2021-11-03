@@ -22,6 +22,7 @@
 
 class DataTransport{
 private:
+    unsigned int buffer_len;
     char* dst_hostname;  /* Hostname of the destination */
     char* dst_ip;  /* Ip of the destination */
     unsigned int port;  /* Port to use */
@@ -42,6 +43,11 @@ private:
     void open_port();
 
 public:
+
+    /**
+     * Constructs a data-transport object. With no hostname.
+     */
+    DataTransport();
 
     /**
      * Constructs a data-transport object.

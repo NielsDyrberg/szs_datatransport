@@ -52,6 +52,6 @@ void test_recv_two_longlong_int(){
 }
 
 int main(){
-    test_recv_two_longlong_int();
+    test_recv_random_data();
     return 0;
 }
