@@ -6,6 +6,11 @@
 #define C_SOUNDZONE_CLIENT_DATATRANSPORT_H
 
 #include <sys/socket.h>
+#include <algorithm>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include "netinet/in.h"
+#include <netdb.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -19,34 +24,116 @@
 
 class DataTransport{
 private:
-    unsigned int bufferLen;
-    char* hostname;
-    char* address;
+    unsigned int buffer_len;
+    char* dst_hostname;
+    char* dst_ip;
     unsigned int port;
-    unsigned int headerSize;
-    // unsigned char encoding;
-    unsigned char addressFamily; // Not sure on the type
-    unsigned char sockType; // Not sure on the type
-    int s; // socket
+    bool is_ip;
+
+    struct sockaddr_in src_addr{}, dst_addr{};
+    struct sockaddr_storage src_storage{}, dst_storage{};
+    socklen_t src_addr_size, dst_addr_size;
+    int src_s, dst_s; // Destination socket
     bool portOpen;
     bool connected;
     uint8_t buffer[BUFFER_LEN] = {0};
-    uint16_t bytes_recv = 0;
+    int16_t bytes_recv = 0;
 
     int getHostByName();
+    int getHostByIp();
     void open_port();
-    void close();
-    int connect();
 
 public:
+    /**
+     * Constructs a data-transport object. With no hostname.
+     */
     DataTransport();
-    explicit DataTransport(unsigned int port);
+
+    /**
+     * Constructs a data-transport object.
+     *
+     * @details Port: 1695
+     *
+     * @param hostname[in] Hostname of the device to where the connection should be made.
+     */
+    explicit DataTransport(char* hostname);
+
+    /**
+     * Constructs a data-transport object.
+     *
+     * @param hostname[in] Hostname of the device to where the connection should be made.
+     * @param port[in] The port used for communication.
+     */
+    DataTransport(char* hostname, unsigned int port);
+
+    /**
+     * Constructs a data-transport object.
+     *
+     * @param host[in] Hostname or ip of the device to where the connection should be made.
+     * @param port[in] The port used for communication.
+     * @param is_ip[in] Defines if the @host is ip or hostname.
+     */
+    DataTransport(char* host, unsigned int port, bool is_ip);
+
+    /**
+     * Constructs a data-transport object.
+     *
+     * @param hostname[in] Hostname of the device to where the connection should be made.
+     * @param port[in] The port used for communication.
+     * @param bufferLen[in] The maximum socket buffer length.
+     * @param addrFamily[in] The connection type, default AF_INET (ip).
+     * @param socketType[in] The socket type, default SOCK_DGRAM (udp).
+     */
     DataTransport(unsigned int port, unsigned int buffer_len, unsigned int header_size=HEADER_SIZE,
                   unsigned char addr_family=ADDRESS_FAMILY, unsigned  char socket_type=SOCK_TYPE);
-    unsigned char receive();
-    void send(u_int8_t *msg, uint8_t size);
-    char* GetHostname();
+
+    /**
+     * Opens a connection.
+     *
+     * @returns int s.
+     * @retval s < 0 if connection could not be established, s > if socket was made.
+     */
+    int open_connection();
+    void close();
+
+    /**
+     * Used to receive a msg.
+     *
+     * @return The size of received msg.
+     */
+    int16_t receive();
+
+    /**
+     * Sends #msg to the specified #hostname
+     *
+     * @param msg[in] Pointer to the msg to send.
+     * @param size[in] Size of the msg to send.
+     */
+    int send(uint8_t *msg, uint16_t size);
+
+    /**
+     * Sends #msg to the specified #hostname
+     *
+     * @param msg[in] Pointer to the msg to send.
+     * @param size[in] Size of the msg to send.
+     */
+    int send(long long unsigned int *msg, uint8_t size);
+
+    /**
+     * Used to get the received buffer.
+     *
+     * @param buff[in,out] Pointer to the msg buffer.
+     * @return buff The pointer to the msg
+     */
     uint8_t* GetBuffer(uint8_t* buff, uint16_t* size);
+
+    /**
+     * Used to get the received buffer.
+     *
+     * @param buff[in,out] Pointer to the msg buffer.
+     * @return buff The pointer to the msg
+     */
+    long long unsigned int* GetBuffer(long long unsigned int* buff, uint8_t* size);
 };
 
 #endif //C_SOUNDZONE_CLIENT_DATATRANSPORT_H
