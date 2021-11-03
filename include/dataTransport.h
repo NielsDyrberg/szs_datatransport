@@ -16,38 +16,32 @@
 #include <cstring>
 
 #define PORT 1695 // port # for tcp
-#define HEADER_SIZE 2 // two bytes for header size
-#define ADDRESS_FAMILY AF_INET
+#define ADDRESS_FAMILY AF_INET // Address is an ip type
 #define SOCK_TYPE SOCK_DGRAM  // UDP
-// #define ENCODING "utf-8"  // What encoding to use when encoding text
 #define BUFFER_LEN 1028  // Length of rx buffer
 
 class DataTransport{
 private:
-    unsigned int buffer_len;
-    char* dst_hostname;
-    char* dst_ip;
-    unsigned int port;
-    bool is_ip;
+    char* dst_hostname;  /* Hostname of the destination */
+    char* dst_ip;  /* Ip of the destination */
+    unsigned int port;  /* Port to use */
+    bool is_ip;  /* Defines if the program should use dst_hostname or dst_ip */
 
-    struct sockaddr_in src_addr{}, dst_addr{};
-    struct sockaddr_storage src_storage{}, dst_storage{};
-    socklen_t src_addr_size, dst_addr_size;
-    int src_s, dst_s; // Destination socket
-    bool portOpen;
-    bool connected;
-    uint8_t buffer[BUFFER_LEN] = {0};
+    struct sockaddr_in src_addr{}, dst_addr{};  /* Stores address data for the socket */
+    struct sockaddr_storage src_storage{}, dst_storage{};  /* - */
+    socklen_t src_addr_size, dst_addr_size;  /* Size of the address data */
+    int src_s, dst_s;  /* Sockets */
+    bool portOpen;  /* Keeps track on if the port is open */
+    bool connected;  /* Keeps track on if a connection is established */
+    uint8_t buffer[BUFFER_LEN] = {0};  /* Buffer to store the  */
     int16_t bytes_recv = 0;
 
+    void setHost(char *host);
     int getHostByName();
     int getHostByIp();
     void open_port();
 
 public:
-    /**
-     * Constructs a data-transport object. With no hostname.
-     */
-    DataTransport();
 
     /**
      * Constructs a data-transport object.
@@ -56,15 +50,7 @@ public:
      *
      * @param hostname[in] Hostname of the device to where the connection should be made.
      */
-    explicit DataTransport(char* hostname);
-
-    /**
-     * Constructs a data-transport object.
-     *
-     * @param hostname[in] Hostname of the device to where the connection should be made.
-     * @param port[in] The port used for communication.
-     */
-    DataTransport(char* hostname, unsigned int port);
+    DataTransport(char* host, bool is_ip);
 
     /**
      * Constructs a data-transport object.
@@ -84,8 +70,7 @@ public:
      * @param addrFamily[in] The connection type, default AF_INET (ip).
      * @param socketType[in] The socket type, default SOCK_DGRAM (udp).
      */
-    DataTransport(unsigned int port, unsigned int buffer_len, unsigned int header_size=HEADER_SIZE,
-                  unsigned char addr_family=ADDRESS_FAMILY, unsigned  char socket_type=SOCK_TYPE);
+    DataTransport(unsigned int port, unsigned char addr_family=ADDRESS_FAMILY, unsigned  char socket_type=SOCK_TYPE);
 
     /**
      * Opens a connection.

@@ -17,54 +17,13 @@
  * Public methods
  **********************************************************************************************************************/
 
-DataTransport::DataTransport() {
-    this->buffer_len = BUFFER_LEN;
+DataTransport::DataTransport(char* host, bool is_ip) {
+    this->port = PORT;
+    this->is_ip = is_ip;
     this->dst_hostname = nullptr;
     this->dst_ip = nullptr;
-    this->port = PORT;
-    this->is_ip = false;
 
-    this->src_addr = {};
-    this->src_storage = {};
-    this->src_addr_size = {};
-    this->src_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->dst_addr = {};
-    this->dst_storage = {};
-    this->dst_addr_size = {};
-    this->dst_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->portOpen = false;
-    this->connected = false;
-}
-
-DataTransport::DataTransport(char* hostname) {
-    this->buffer_len = BUFFER_LEN;
-    this->dst_hostname = hostname;
-    this->dst_ip = nullptr;
-    this->port = PORT;
-    this->is_ip = false;
-
-    this->src_addr = {};
-    this->src_storage = {};
-    this->src_addr_size = {};
-    this->src_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->dst_addr = {};
-    this->dst_storage = {};
-    this->dst_addr_size = {};
-    this->dst_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->portOpen = false;
-    this->connected = false;
-}
-
-DataTransport::DataTransport(char* hostname, unsigned int port){
-    this->buffer_len = BUFFER_LEN;
-    this->dst_hostname = hostname;
-    this->dst_ip = nullptr;
-    this->port = PORT;
-    this->is_ip = false;
+    setHost(host);
 
     this->src_addr = {};
     this->src_storage = {};
@@ -81,18 +40,12 @@ DataTransport::DataTransport(char* hostname, unsigned int port){
 }
 
 DataTransport::DataTransport(char *host, unsigned int port, bool is_ip) {
-    this->buffer_len = BUFFER_LEN;
     this->port = port;
     this->is_ip = is_ip;
+    this->dst_hostname = nullptr;
+    this->dst_ip = nullptr;
 
-    // Set either host ip or name
-    if (is_ip){
-        this->dst_ip = host;
-        this->dst_hostname = nullptr;
-    } else{
-        this->dst_hostname = host;
-        this->dst_ip = nullptr;
-    }
+    setHost(host);
 
     this->src_addr = {};
     this->src_storage = {};
@@ -108,9 +61,7 @@ DataTransport::DataTransport(char *host, unsigned int port, bool is_ip) {
     this->connected = false;
 }
 
-DataTransport::DataTransport(unsigned int port, unsigned int buffer_len, unsigned int header_size,
-                             unsigned char addr_family, unsigned  char socket_type){
-    this->buffer_len = buffer_len;
+DataTransport::DataTransport(unsigned int port, unsigned char addr_family, unsigned  char socket_type){
     this->dst_hostname = nullptr;
     this->dst_ip = nullptr;
     this->port = port;
@@ -226,6 +177,22 @@ long long unsigned int* DataTransport::GetBuffer(long long unsigned int* buff, u
 /**********************************************************************************************************************
  * Private methods
  **********************************************************************************************************************/
+
+/**
+ * Sets the host variables, depending on if the host var is ip or hostname
+ * @param host, Either ip or hostname of the host.
+ * @return None
+ */
+void DataTransport::setHost(char *host){
+    // Set either host ip or name
+    if (is_ip){
+        this->dst_ip = host;
+        this->dst_hostname = nullptr;
+    } else{
+        this->dst_hostname = host;
+        this->dst_ip = nullptr;
+    }
+}
 
 /**
  * @brief Gets host address info from hostname
