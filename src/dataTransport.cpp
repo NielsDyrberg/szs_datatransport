@@ -263,7 +263,7 @@ int DataTransport::getHostByIp(){
     memset(&dst_addr, '0', sizeof(dst_addr));
 
     dst_addr.sin_family = ADDRESS_FAMILY;
-    dst_addr.sin_port = port;
+    dst_addr.sin_port = htons( port );
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     if(inet_pton(ADDRESS_FAMILY, dst_ip, &dst_addr.sin_addr)<=0)

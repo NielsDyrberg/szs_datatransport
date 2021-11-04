@@ -3,55 +3,39 @@
 //
 
 #include <iostream>
+#include <unistd.h>
 #include "dataTransport.h"
 
+char host[] = "192.168.0.105";
+int port = 1695;
+
+
 void test_send(){
-    char hostname[] = "10.103.8.129";
-    DataTransport dt(hostname, 1695, true);
-    // char* tmp_hostname = dt.GetHostname();
+    DataTransport dt(host, port, true);
     dt.open_connection();
     uint8_t msgToSend[] = {255, 3, 53, 35, 42};
     dt.send(msgToSend, sizeof(msgToSend));
 }
 
 void test_send_longlongint(){
-    char hostname[] = "10.103.8.129";
-    DataTransport dt(hostname, 1695, true);
-    // char* tmp_hostname = dt.GetHostname();
+    DataTransport dt(host, port, true);
     dt.open_connection();
     long long unsigned int msgToSend[] = {1229782938247303441, 2459565876494606882};
     dt.send(msgToSend, sizeof(msgToSend));
 }
 
-void test_recv_random_data(){
-    uint8_t * bufPTR = nullptr;
-    uint16_t size = 0;
-    DataTransport dt;
-    if(dt.receive() > 0) {
-        bufPTR = dt.GetBuffer(bufPTR, &size);
-        for (int i = 0; i < size; i++) {
-            std::cout << unsigned(*bufPTR) << std::endl;
-            bufPTR++;
-        }
+[[noreturn]] void test_send_continuous(){
+    DataTransport dt(host, port, true);
+    dt.open_connection();
+    uint8_t msgToSend[] = {1, 2, 43, 2, 1, 2, 2, 3, 1, 12, 2, 31, 2, 3};
+    while (true){
+        dt.send(msgToSend, sizeof(msgToSend));
+        std::cout << "yes" << std::endl;
+        sleep(1);
     }
-    std::cout << "Hello, World!" << std::endl;
-}
-
-void test_recv_two_longlong_int(){
-    long long unsigned int* bufPTR = nullptr;
-    uint8_t size = 0;
-    DataTransport dt;
-    if(dt.receive() > 0) {
-        bufPTR = dt.GetBuffer(bufPTR, &size);
-        for (int i = 0; i < size; i++) {
-            std::cout << *bufPTR << std::endl;
-            bufPTR++;
-        }
-    }
-    std::cout << "Hello, World!" << std::endl;
 }
 
 int main(){
-    test_recv_random_data();
+    test_send_continuous();
     return 0;
 }
