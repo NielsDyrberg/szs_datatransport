@@ -4,6 +4,7 @@
 
 #include "dataTransport.h"
 
+#include <cstdio>
 #include <iostream>
 #include <cstddef>
 #include <cstdint>
@@ -17,11 +18,11 @@
  * Public methods
  **********************************************************************************************************************/
 
-DataTransport::DataTransport() {
+DataTransport::DataTransport(unsigned int port) {
     this->buffer_len = BUFFER_LEN;
     this->dst_hostname = nullptr;
     this->dst_ip = nullptr;
-    this->port = PORT;
+    this->port = port;
     this->is_ip = false;
 
     this->src_addr = {};
@@ -38,28 +39,7 @@ DataTransport::DataTransport() {
     this->connected = false;
 }
 
-DataTransport::DataTransport(char* host, bool is_ip) {
-    this->buffer_len = BUFFER_LEN;
-    this->port = PORT;
-    this->is_ip = is_ip;
-    this->dst_hostname = nullptr;
-    this->dst_ip = nullptr;
-
-    setHost(host);
-
-    this->src_addr = {};
-    this->src_storage = {};
-    this->src_addr_size = {};
-    this->src_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->dst_addr = {};
-    this->dst_storage = {};
-    this->dst_addr_size = {};
-    this->dst_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->portOpen = false;
-    this->connected = false;
-}
+/**********************************************************************************************************************/
 
 DataTransport::DataTransport(char *host, unsigned int port, bool is_ip) {
     this->buffer_len = BUFFER_LEN;
@@ -84,28 +64,11 @@ DataTransport::DataTransport(char *host, unsigned int port, bool is_ip) {
     this->connected = false;
 }
 
-DataTransport::DataTransport(unsigned int port, unsigned char addr_family, unsigned  char socket_type){
-    this->buffer_len = BUFFER_LEN;
-    this->dst_hostname = nullptr;
-    this->dst_ip = nullptr;
-    this->port = port;
-    this->is_ip = false;
-
-    this->src_addr = {};
-    this->src_storage = {};
-    this->src_addr_size = {};
-    this->src_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->dst_addr = {};
-    this->dst_storage = {};
-    this->dst_addr_size = {};
-    this->dst_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->portOpen = false;
-    this->connected = false;
-}
+/**********************************************************************************************************************/
 
 void DataTransport::close(){}
+
+/**********************************************************************************************************************/
 
 int DataTransport::open_connection(){
     int err;
@@ -131,11 +94,43 @@ int DataTransport::open_connection(){
     return 0;
 }
 
-int16_t DataTransport::receive(){
+/**********************************************************************************************************************/
+
+int16_t DataTransport::receive(bool timeout){
     char host[NI_MAXHOST], service[NI_MAXSERV];
+    struct timeval tv{};
+    fd_set set;
+    int retval;
 
     if (!this->portOpen){
         this->open_port();
+    }
+
+    if(timeout){
+        /* Watch stdin (fd 0) to see when it has input. */
+        FD_ZERO(&set);
+        FD_SET(src_s, &set);
+
+        /* Wait up to five seconds. */
+        tv.tv_sec = 5;
+        tv.tv_usec = 0;
+
+        retval = select(src_s+1, &set, nullptr, nullptr, &tv);
+        /* Don't rely on the value of tv now! */
+
+        if (retval == -1){
+            perror("select()");
+            return -1;
+        }
+        else if (retval){
+            // printf("Data is available now.\n");
+            /* FD_ISSET(0, &rfds) will be true. */
+        }
+        else {
+            printf("No data within five seconds.\n");
+            return -2;
+        }
+
     }
 
     for(;;){
@@ -158,7 +153,7 @@ int16_t DataTransport::receive(){
     }
 
     if (this->bytes_recv < 0){
-        std::cout << "Error happend" << std::endl;
+        std::cout << "Error happened, datatransport.cpp" << std::endl;
         for (int i = 0; i < this->bytes_recv; i++) {
             std::cout << unsigned(*this->buffer) << std::endl;
             this->buffer[i];
@@ -167,6 +162,20 @@ int16_t DataTransport::receive(){
 
     return this->bytes_recv;
 }
+
+/**********************************************************************************************************************/
+
+int DataTransport::send(uint8_t msg){
+    if(!this->connected){
+        return -1;
+    }
+
+    ::send(this->dst_s , &msg , sizeof(uint8_t), 0 );
+
+    return 0;
+}
+
+/**********************************************************************************************************************/
 
 int DataTransport::send(uint8_t* msg, uint16_t size){
     if(!this->connected){
@@ -177,8 +186,11 @@ int DataTransport::send(uint8_t* msg, uint16_t size){
     return 0;
 }
 
+/**********************************************************************************************************************/
+
 int DataTransport::send(long long unsigned int *msg, uint8_t size){
     if(!this->connected){
+        std::cout << "Not connected, datatransport.cpp" << std::endl;
         return -1;
     }
 
@@ -186,11 +198,53 @@ int DataTransport::send(long long unsigned int *msg, uint8_t size){
     return 0;
 }
 
+/**********************************************************************************************************************/
+
+int16_t DataTransport::send_and_receive(uint8_t msg) {
+    int16_t err;
+    err = (int16_t)this->send(msg);
+    if(err < 0){
+        std::cout << "Send failed" << std::endl;
+        return -1;
+    }
+
+    err = this->receive(true);
+    if(err < 0){
+        std::cout << "Receive failed" << std::endl;
+        return -2;
+    }
+
+    return err;
+}
+
+/**********************************************************************************************************************/
+
+int16_t DataTransport::send_and_receive(uint8_t *msg, uint16_t size) {
+    int16_t err;
+    err = (int16_t)this->send(msg, size);
+    if(err < 0){
+        std::cout << "Send failed" << std::endl;
+        return -1;
+    }
+
+    err = this->receive(true);
+    if(err < 0){
+        std::cout << "Receive failed" << std::endl;
+        return -2;
+    }
+
+    return err;
+}
+
+/**********************************************************************************************************************/
+
 uint8_t* DataTransport::GetBuffer(uint8_t* buff, uint16_t* size){
     buff = &this->buffer[0];
     *size = this->bytes_recv;
     return buff;
 }
+
+/**********************************************************************************************************************/
 
 long long unsigned int* DataTransport::GetBuffer(long long unsigned int* buff, uint8_t* size){
     buff = (long long unsigned int*)&this->buffer[0];

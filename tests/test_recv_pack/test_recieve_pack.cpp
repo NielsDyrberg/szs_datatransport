@@ -4,10 +4,12 @@
 #include <iostream>
 #include "dataTransport.h"
 
+#define PORT 1695
+
 void test_recv_two_longlong_int(){
     long long unsigned int* bufPTR = nullptr;
     uint8_t size = 0;
-    DataTransport dt;
+    DataTransport dt(PORT);
     if(dt.receive() > 0) {
         bufPTR = dt.GetBuffer(bufPTR, &size);
         for (int i = 0; i < size; i++) {
@@ -22,7 +24,7 @@ void test_recv_two_longlong_int(){
 [[noreturn]] void test_recv_random_data(){
     uint8_t * bufPTR = nullptr;
     uint16_t size = 0;
-    DataTransport dt;
+    DataTransport dt(PORT);
     while(1){
         if(dt.receive() > 0) {
             bufPTR = dt.GetBuffer(bufPTR, &size);

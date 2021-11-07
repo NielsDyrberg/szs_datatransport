@@ -5,20 +5,16 @@
 #ifndef C_SOUNDZONE_CLIENT_DATATRANSPORT_H
 #define C_SOUNDZONE_CLIENT_DATATRANSPORT_H
 
-#include <sys/socket.h>
-#include <algorithm>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include "netinet/in.h"
-#include <netdb.h>
-#include <cstddef>
 #include <cstdint>
-#include <cstring>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <strings.h>
 
-#define PORT 1695 // port # for tcp
 #define ADDRESS_FAMILY AF_INET // Address is an ip type
 #define SOCK_TYPE SOCK_DGRAM  // UDP
 #define BUFFER_LEN 1028  // Length of rx buffer
+
 
 class DataTransport{
 private:
@@ -45,18 +41,11 @@ private:
 public:
 
     /**
-     * Constructs a data-transport object. With no hostname.
-     */
-    DataTransport();
-
-    /**
      * Constructs a data-transport object.
      *
-     * @details Port: 1695
-     *
-     * @param hostname[in] Hostname of the device to where the connection should be made.
+     * @param port[in] The port used for communication.
      */
-    DataTransport(char* host, bool is_ip);
+    explicit DataTransport(unsigned int port);
 
     /**
      * Constructs a data-transport object.
@@ -66,17 +55,6 @@ public:
      * @param is_ip[in] Defines if the @host is ip or hostname.
      */
     DataTransport(char* host, unsigned int port, bool is_ip);
-
-    /**
-     * Constructs a data-transport object.
-     *
-     * @param hostname[in] Hostname of the device to where the connection should be made.
-     * @param port[in] The port used for communication.
-     * @param bufferLen[in] The maximum socket buffer length.
-     * @param addrFamily[in] The connection type, default AF_INET (ip).
-     * @param socketType[in] The socket type, default SOCK_DGRAM (udp).
-     */
-    DataTransport(unsigned int port, unsigned char addr_family=ADDRESS_FAMILY, unsigned  char socket_type=SOCK_TYPE);
 
     /**
      * Opens a connection.
@@ -92,7 +70,15 @@ public:
      *
      * @return The size of received msg.
      */
-    int16_t receive();
+    int16_t receive(bool timeout = false);
+
+    /**
+     * Sends #msg, where #msg is one byte.
+     * @param msg[in] Bytes to send.
+     * @returns int s.
+     * @retval s=0 if msg sent, s<0 if send failed.
+     */
+    int send(uint8_t msg);
 
     /**
      * Sends #msg to the specified #hostname
@@ -109,6 +95,9 @@ public:
      * @param size[in] Size of the msg to send.
      */
     int send(long long unsigned int *msg, uint8_t size);
+
+    int16_t send_and_receive(uint8_t msg);
+    int16_t send_and_receive(uint8_t *msg, uint16_t size);
 
     /**
      * Used to get the received buffer.
