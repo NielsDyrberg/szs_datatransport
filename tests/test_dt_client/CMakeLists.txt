@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.16) # CMake version check
 project(test_dt_client VERSION 0.0.1) # Create project "test_send_pack"
-set(CMAKE_CXX_STANDARD 14) # Enable c++14 standard
+set(CMAKE_CXX_STANDARD 20) # Enable c++14 standard
 
 
 # Add main.cpp file of project root directory as source file

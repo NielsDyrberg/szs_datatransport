@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include "udp_client.h"
 
-char host[] = "192.168.1.41";
+char host[] = "192.168.1.36";
 int port = 1695;
 
 
@@ -14,16 +14,18 @@ int port = 1695;
     uint8_t * bufPTR = nullptr;
     uint16_t size = 0;
     UDP_client dt(host, port, true);
+    uint8_t msg[] = {0x50, 0x69, 0x6e, 0x67};
 
     while (true){
-        if(dt.send(0xF1) > 0) {
-            /*bufPTR = dt.GetBuffer(bufPTR, &size);
+        if(dt.send_and_receive(msg, sizeof(msg)) > 0) {
+            bufPTR = dt.GetBuffer(bufPTR, &size);
             for (int i = 0; i < size; i++) {
                 std::cout << unsigned(*bufPTR) << std::endl;
                 bufPTR++;
-            }*/
+            }
         }
-        sleep(1);
+        std::cout << "Master rerun" << std::endl;
+        //sleep(1);
     }
 }
 

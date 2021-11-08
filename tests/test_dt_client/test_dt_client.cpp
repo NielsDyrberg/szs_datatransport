@@ -11,18 +11,19 @@
     uint8_t * bufPTR = nullptr;
     uint16_t size = 0;
     UDP_server dt(PORT);
-    uint8_t res[] = {0xF1, 0x01};
+    uint8_t msg[] = {0x50, 0x6f, 0x6e, 0x67};
 
     while (true) {
-        if (dt.receive(true) > 0) {
-            /*bufPTR = dt.GetBuffer(bufPTR, &size);
-            if (*bufPTR == 0xF1) {
-                dt.send(res, sizeof(res));
+        if (dt.receive(false) > 0) {
+            bufPTR = dt.GetBuffer(bufPTR, &size);
+            if (*bufPTR == 0x50) {
+                dt.send(msg, sizeof(msg));
             }
             for (int i = 0; i < size; i++) {
                 std::cout << unsigned(*bufPTR) << std::endl;
                 bufPTR++;
-            }*/
+            }
+            std::cout << "data" << std::endl;
         } else{
             std::cout << "Client rerun" << std::endl;
         }

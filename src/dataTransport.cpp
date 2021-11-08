@@ -3,237 +3,84 @@
 //
 
 #include "dataTransport.h"
-
-#include <cstdio>
 #include <iostream>
-#include <cstddef>
-#include <cstdint>
-#include <algorithm>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include "netinet/in.h"
-#include <netdb.h>
 
 /**********************************************************************************************************************
  * Public methods
  **********************************************************************************************************************/
 
 DataTransport::DataTransport(unsigned int port) {
-    this->buffer_len = BUFFER_LEN;
-    this->dst_hostname = nullptr;
-    this->dst_ip = nullptr;
-    this->port = port;
-    this->is_ip = false;
-
-    this->src_addr = {};
-    this->src_storage = {};
-    this->src_addr_size = {};
-    this->src_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->dst_addr = {};
-    this->dst_storage = {};
-    this->dst_addr_size = {};
-    this->dst_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->portOpen = false;
-    this->connected = false;
-}
-
-/**********************************************************************************************************************/
-
-DataTransport::DataTransport(char *host, unsigned int port, bool is_ip) {
+    this->timeout_sec = 5;
+    this->timeout_usec = 0;
     this->buffer_len = BUFFER_LEN;
     this->port = port;
-    this->is_ip = is_ip;
-    this->dst_hostname = nullptr;
-    this->dst_ip = nullptr;
 
-    setHost(host);
-
-    this->src_addr = {};
-    this->src_storage = {};
-    this->src_addr_size = {};
-    this->src_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->dst_addr = {};
-    this->dst_storage = {};
-    this->dst_addr_size = {};
-    this->dst_s = socket(AF_INET, SOCK_TYPE, 0);
-
-    this->portOpen = false;
-    this->connected = false;
-}
-
-/**********************************************************************************************************************/
-
-void DataTransport::close(){}
-
-/**********************************************************************************************************************/
-
-int DataTransport::open_connection(){
-    int err;
-
-    // Get addr info
-    if (is_ip) {
-        err = getHostByIp();
-    } else{
-        err = getHostByName();
-    }
-    if(err < 0){
-        // Error happened
-        return -1;
-    }
-
-    if (::connect(dst_s, (struct sockaddr *)&dst_addr, sizeof(dst_addr)) < 0)
+    if(( this->s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP) )< 0)
     {
-        printf("Connection Failed");
-        exit(EXIT_FAILURE);
+        printf("Cannot create socket\n");
     }
-    this->connected=true;
 
-    return 0;
+    if(( this->listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP) )< 0)
+    {
+        printf("Cannot create socket\n");
+    }
+
+    set_listen_addr();
 }
+
 
 /**********************************************************************************************************************/
 
-int16_t DataTransport::receive(bool timeout){
-    char host[NI_MAXHOST], service[NI_MAXSERV];
-    struct timeval tv{};
-    fd_set set;
-    int retval;
-
-    if (!this->portOpen){
-        this->open_port();
-    }
-
-    if(timeout){
-        /* Watch stdin (fd 0) to see when it has input. */
-        FD_ZERO(&set);
-        FD_SET(src_s, &set);
-
-        /* Wait up to five seconds. */
-        tv.tv_sec = 5;
-        tv.tv_usec = 0;
-
-        retval = select(src_s+1, &set, nullptr, nullptr, &tv);
-        /* Don't rely on the value of tv now! */
-
-        if (retval == -1){
-            perror("select()");
-            return -1;
-        }
-        else if (retval){
-            // printf("Data is available now.\n");
-            /* FD_ISSET(0, &rfds) will be true. */
-        }
-        else {
-            printf("No data within five seconds.\n");
-            return -2;
-        }
-
-    }
-
+int16_t DataTransport::receive(bool timeout, struct sockaddr_in* addr, socklen_t* addr_size){
+    int err = 0;
     for(;;){
-        this->bytes_recv = recvfrom(src_s, this->buffer, this->buffer_len, 0, (struct sockaddr *)&src_addr,
-                                    &src_addr_size);
+        if(timeout){
+            err = timeout_handler();
+            if (err < 0){
+                this->bytes_recv = -1;
+                break;
+            }
+        }
+
+        this->bytes_recv = recvfrom(listen_s, this->buffer, this->buffer_len, 0, (struct sockaddr *)addr, addr_size);
         if(this->bytes_recv < 0){
             // ignore error
             continue;
         }
 
-        dst_s = getnameinfo((struct sockaddr *) &src_addr,
-                            src_addr_size, host, NI_MAXHOST,
-                            service, NI_MAXSERV, NI_NUMERICSERV);
-        if (dst_s == 0)
-            std::cout << "Received: " << (long) bytes_recv << " bytes from: " << host << " : " << service << std::endl;
-        else
-            fprintf(stderr, "getnameinfo: %s\n", gai_strerror(dst_s));
-
         break;
     }
 
     if (this->bytes_recv < 0){
-        std::cout << "Error happened, datatransport.cpp" << std::endl;
+        std::cout <<
+        "Error happened, [datatransport.cpp, receive(struct sockaddr_in* addr, socklen_t* addr_size, bool timeout)]"
+        << std::endl;
         for (int i = 0; i < this->bytes_recv; i++) {
             std::cout << unsigned(*this->buffer) << std::endl;
             this->buffer[i];
         }
     }
-
+    if(addr != nullptr){
+        addr->sin_port = htons( port );
+    }
     return this->bytes_recv;
 }
 
 /**********************************************************************************************************************/
 
-int DataTransport::send(uint8_t msg){
-    if(!this->connected){
-        return -1;
-    }
+int DataTransport::send(uint8_t msg, struct sockaddr_in* addr, const socklen_t* addr_size) const{
+    return sendto(s , &msg , sizeof(uint8_t), 0, (struct sockaddr*)addr, *addr_size);
+}
 
-    ::send(this->dst_s , &msg , sizeof(uint8_t), 0 );
 
-    return 0;
+int DataTransport::send(const uint8_t* msg, uint16_t msg_size, struct sockaddr_in* addr, const socklen_t* addr_size) const{
+    return sendto(s , msg , msg_size, 0, (struct sockaddr*)addr, *addr_size);
 }
 
 /**********************************************************************************************************************/
 
-int DataTransport::send(uint8_t* msg, uint16_t size){
-    if(!this->connected){
-        return -1;
-    }
-
-    ::send(this->dst_s , msg , size , 0 );
-    return 0;
-}
-
-/**********************************************************************************************************************/
-
-int DataTransport::send(long long unsigned int *msg, uint8_t size){
-    if(!this->connected){
-        std::cout << "Not connected, datatransport.cpp" << std::endl;
-        return -1;
-    }
-
-    ::send(this->dst_s , msg , size , 0 );
-    return 0;
-}
-
-/**********************************************************************************************************************/
-
-int16_t DataTransport::send_and_receive(uint8_t msg) {
-    int16_t err;
-    err = (int16_t)this->send(msg);
-    if(err < 0){
-        std::cout << "Send failed" << std::endl;
-        return -1;
-    }
-
-    err = this->receive(true);
-    if(err < 0){
-        std::cout << "Receive failed" << std::endl;
-        return -2;
-    }
-
-    return err;
-}
-
-/**********************************************************************************************************************/
-
-int16_t DataTransport::send_and_receive(uint8_t *msg, uint16_t size) {
-    int16_t err;
-    err = (int16_t)this->send(msg, size);
-    if(err < 0){
-        std::cout << "Send failed" << std::endl;
-        return -1;
-    }
-
-    err = this->receive(true);
-    if(err < 0){
-        std::cout << "Receive failed" << std::endl;
-        return -2;
-    }
-
-    return err;
+int DataTransport::send(const long long unsigned int *msg, uint8_t msg_size, struct sockaddr_in* addr, const socklen_t* addr_size) const{
+    return sendto(s , msg , msg_size, 0, (struct sockaddr*)addr, *addr_size);
 }
 
 /**********************************************************************************************************************/
@@ -252,101 +99,70 @@ long long unsigned int* DataTransport::GetBuffer(long long unsigned int* buff, u
     return buff;
 }
 
+int DataTransport::set_timeout_len(unsigned int sec, unsigned int usec){
+    if(sec > 60 or usec > 1000){
+        std::cout <<
+        "sec or usec out of range, [Datatransport.cpp, set_timeout_len(unsigned int sec, unsigned int usec)]"
+        << std::endl;
+        return -1;
+    }
+
+    timeout_sec = (__time_t) sec;
+    timeout_usec = (__suseconds_t) usec;
+    return 0;
+}
+
 /**********************************************************************************************************************
  * Private methods
  **********************************************************************************************************************/
 
-/**
- * Sets the host variables, depending on if the host var is ip or hostname
- * @param host, Either ip or hostname of the host.
- * @return None
- */
-void DataTransport::setHost(char *host){
-    // Set either host ip or name
-    if (is_ip){
-        this->dst_ip = host;
-        this->dst_hostname = nullptr;
-    } else{
-        this->dst_hostname = host;
-        this->dst_ip = nullptr;
-    }
-}
+int DataTransport::timeout_handler() {
+    struct timeval tv{};
+    fd_set set;
+    int retval;
 
-/**
- * @brief Gets host address info from hostname
- * @details It is not implemented yet, so it always returns unsuccesful.
- * @return int
- * @retval -1, if unsuccessful
- * @retval 0, if successful
- */
-int DataTransport::getHostByName() {
-    /*
-    if (dst_hostname == nullptr){return -1;}  // Return error if hostname is not set
+    /* Watch stdin (fd 0) to see when it has input. */
+    FD_ZERO(&set);
+    FD_SET(listen_s, &set);
 
-    struct addrinfo hints = {}, *addrs;
-    char port_str[16] = {};
+    /* Wait up to five seconds. */
+    tv.tv_sec = timeout_sec;
+    tv.tv_usec = timeout_usec;
 
-    hints.ai_family = ADDRESS_FAMILY;
-    hints.ai_socktype = SOCK_TYPE;
-    hints.ai_protocol = IPPROTO_UDP;
+    retval = select(listen_s+1, &set, nullptr, nullptr, &tv);
+    /* Don't rely on the value of tv now! */
 
-    sprintf(port_str, "%d", port);
-
-    dst_s = getaddrinfo(dst_hostname, port_str, &hints, &addrs);
-    if (dst_s != 0)
-    {
-        fprintf(stderr, "%s: %s\n", dst_hostname, gai_strerror(dst_s));
-        return -1;
-        // abort();
-    }
-    // this->dst_addr = (char*)&addrs;
-    return 0;
-    */
-    return -1;
-}
-
-/**
- * Gets host address info from IP
- * @return int
- * @retval -1, if unsuccessful
- * @retval 0, if successful
- */
-int DataTransport::getHostByIp(){
-    if (dst_ip == nullptr){return -1;}  // Return error if ip is not set
-
-    memset(&dst_addr, '0', sizeof(dst_addr));
-
-    dst_addr.sin_family = ADDRESS_FAMILY;
-    dst_addr.sin_port = htons( port );
-
-    // Convert IPv4 and IPv6 addresses from text to binary form
-    if(inet_pton(ADDRESS_FAMILY, dst_ip, &dst_addr.sin_addr)<=0)
-    {
-        printf("Invalid address/ Address not supported");
+    if (retval == -1){
+        perror("select()");
         return -1;
     }
-
-    return 0;
+    else if (retval){
+        // printf("Data is available now.\n");
+        /* FD_ISSET(0, &rfds) will be true. */
+        return 0;
+    }
+    else {
+        printf("No data within five seconds, [dataTransport.cpp, timeout_handler()].\n");
+        return -2;
+    }
 }
 
-/**
- * Opens port to enable receiving.
- */
-void DataTransport::open_port() {
-    src_addr.sin_family = AF_INET;
-    src_addr.sin_addr.s_addr = INADDR_ANY;
-    src_addr.sin_port = htons( port );
+int DataTransport::set_listen_addr() const {
+    struct sockaddr_in tmp_listen_addr{};
 
-    // Forcefully attaching socket to the port
-    if (bind(src_s, (struct sockaddr *)&src_addr, sizeof(src_addr))<0)
+    bzero(&tmp_listen_addr, sizeof(tmp_listen_addr));
+
+    // Filling server information
+    tmp_listen_addr.sin_family = AF_INET;
+    tmp_listen_addr.sin_port = htons(port);
+    tmp_listen_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    // Bind the socket with the server address
+    if ( bind(listen_s, (const struct sockaddr *)&tmp_listen_addr, sizeof(tmp_listen_addr)) < 0 )
     {
-        perror("bind failed");
+        perror("bind failed, [dataTransport.cpp, set_listen_addr()]");
         exit(EXIT_FAILURE);
     }
 
-    portOpen = true;
+    return 0;
 }
-
-
-
-

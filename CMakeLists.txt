@@ -17,6 +17,7 @@ target_include_directories(szs_datatransport INTERFACE
         )
 
 target_sources(szs_datatransport INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/dataTransport.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/udp_client.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/udp_server.cpp
         )

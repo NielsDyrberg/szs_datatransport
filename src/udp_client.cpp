@@ -5,64 +5,93 @@
 #include "udp_client.h"
 #include <iostream>
 
-UDP_client::UDP_client(char* host, unsigned int port, bool is_ip) {
-    this->buffer_len = BUFFER_LEN;
-    this->port = port;
-    this->connected = false;
+UDP_client::UDP_client(char* host, unsigned int port, bool is_ip): DataTransport(port) {
+    this->known_host = false;
 
     this->ser_hostname = nullptr;
     this->ser_ip = nullptr;
     this->is_ip = is_ip;
 
     setHost(host);
-
-    this->s = socket(ADDRESS_FAMILY, SOCK_TYPE, 0);
 }
 
 /**********************************************************************************************************************/
 
 int16_t UDP_client::receive(bool timeout) {
-    if (!this->connected){
-        this->open_connection();
+    if (!this->known_host){
+        std::cout << "Host not known, [udp_client.cpp, receive(bool timeout)]" << std::endl;
+        return -1;
     }
 
-    for(;;){
-        if(timeout){
-            timeout_handler();
-        }
-
-        this->bytes_recv = recvfrom(s, this->buffer, this->buffer_len, 0, (struct sockaddr *)&ser_addr,
-                                    &ser_addr_size);
-        if(this->bytes_recv < 0){
-            // ignore error
-            continue;
-        }
-
-        break;
-    }
-
-    if (this->bytes_recv < 0){
-        std::cout << "Error happened, datatransport.cpp" << std::endl;
-        for (int i = 0; i < this->bytes_recv; i++) {
-            std::cout << unsigned(*this->buffer) << std::endl;
-            this->buffer[i];
-        }
-    }
-
-    return this->bytes_recv;
-
+    return DataTransport::receive(timeout);
 }
 
 /**********************************************************************************************************************/
 
 int UDP_client::send(uint8_t msg) {
-    if (!this->connected){
-        this->open_connection();
+    if (!this->known_host){
+        std::cout << "Host not known, [udp_client.cpp, send(uint8_t msg)]" << std::endl;
+        return -1;
+    }
+    return DataTransport::send(msg, &ser_addr, &ser_addr_size);
+}
+
+/**********************************************************************************************************************/
+
+int UDP_client::send(const uint8_t* msg, uint16_t msg_size){
+    if (!this->known_host){
+        std::cout << "Host not known, [udp_client.cpp, send(const uint8_t* msg, uint16_t msg_size)]" << std::endl;
+        return -1;
+    }
+    return DataTransport::send(msg, msg_size, &ser_addr, &ser_addr_size);
+}
+
+/**********************************************************************************************************************/
+
+int UDP_client::send(const long long unsigned int *msg, uint8_t msg_size){
+    if (!this->known_host){
+        std::cout << "Host not known, [udp_client.cpp, send(msg, msg_size, &ser_addr, &ser_addr_size)]" << std::endl;
+        return -1;
+    }
+    return DataTransport::send(msg, msg_size, &ser_addr, &ser_addr_size);
+}
+
+/**********************************************************************************************************************/
+
+int16_t UDP_client::send_and_receive(uint8_t msg) {
+    int16_t err;
+    err = (int16_t)this->send(msg);
+    if(err < 0){
+        std::cout << "Send failed, [udp_client.cpp, send_and_receive(uint8_t msg)]" << std::endl;
+        return -1;
     }
 
-    sendto(this->s , &msg , sizeof(uint8_t), 0, (const struct sockaddr *) &ser_addr, ser_addr_size);
+    err = this->receive(true);
+    if(err < 0){
+        std::cout << "Receive failed, [udp_client.cpp, send_and_receive(uint8_t msg)]" << std::endl;
+        return -2;
+    }
 
-    return 0;
+    return err;
+}
+
+/**********************************************************************************************************************/
+
+int16_t UDP_client::send_and_receive(uint8_t *msg, uint16_t size) {
+    int16_t err;
+    err = (int16_t)this->send(msg, size);
+    if(err < 0){
+        std::cout << "Send failed" << std::endl;
+        return -1;
+    }
+
+    err = this->receive(true);
+    if(err < 0){
+        std::cout << "Receive failed" << std::endl;
+        return -2;
+    }
+
+    return err;
 }
 
 /**********************************************************************************************************************
@@ -74,26 +103,17 @@ int UDP_client::send(uint8_t msg) {
  * @param host, Either ip or hostname of the host.
  * @return None
  */
-void UDP_client::setHost(char *host){
+int UDP_client::setHost(char *host){
+    int err;
+
     // Set either host ip or name
     if (is_ip){
         this->ser_ip = host;
         this->ser_hostname = nullptr;
+        err = get_host_by_ip();
     } else{
         this->ser_hostname = host;
         this->ser_ip = nullptr;
-    }
-}
-
-
-int UDP_client::open_connection() {
-    int err;
-
-    // Get addr info
-    if (is_ip) {
-        err = get_host_by_ip();
-    } else{
-        //err = getHostByName();
         err = -1;
     }
     if(err < 0){
@@ -101,55 +121,8 @@ int UDP_client::open_connection() {
         return -1;
     }
 
-    // Bind the socket with the server address
-//    if ( bind(s, (const struct sockaddr *)&ser_addr,
-//              sizeof(ser_addr)) < 0 )
-//    {
-//        perror("bind failed");
-//        exit(EXIT_FAILURE);
-//    }
-
-    if(connect(s, (struct sockaddr *)&ser_addr, sizeof(ser_addr)) < 0)
-    {
-        printf("\n Error : Connect Failed \n");
-        exit(0);
-    }
-
-    ser_addr_size = sizeof(ser_addr);
-    connected = true;
+    known_host = true;
     return 0;
-
-}
-
-int UDP_client::timeout_handler() {
-    struct timeval tv{};
-    fd_set set;
-    int retval;
-
-    /* Watch stdin (fd 0) to see when it has input. */
-    FD_ZERO(&set);
-    FD_SET(s, &set);
-
-    /* Wait up to five seconds. */
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
-
-    retval = select(s+1, &set, nullptr, nullptr, &tv);
-    /* Don't rely on the value of tv now! */
-
-    if (retval == -1){
-        perror("select()");
-        return -1;
-    }
-    else if (retval){
-        // printf("Data is available now.\n");
-        /* FD_ISSET(0, &rfds) will be true. */
-        return 0;
-    }
-    else {
-        printf("No data within five seconds.\n");
-        return -2;
-    }
 }
 
 int UDP_client::get_host_by_ip(){
@@ -167,5 +140,6 @@ int UDP_client::get_host_by_ip(){
         return -1;
     }
 
+    ser_addr_size = sizeof(ser_addr);
     return 0;
 }
