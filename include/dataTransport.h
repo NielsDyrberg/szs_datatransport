@@ -13,7 +13,6 @@
 
 #define ADDRESS_FAMILY AF_INET // Address is an ip type
 #define SOCK_TYPE SOCK_DGRAM  // UDP
-#define BUFFER_LEN 1028  // Length of rx buffer
 
 
 class DataTransport{
@@ -26,7 +25,7 @@ protected:
     unsigned int port;  /* Port to use */
 
     unsigned int buffer_len;
-    uint8_t buffer[BUFFER_LEN] = {0};  /* Buffer to store the  */
+    uint8_t* p_buffer;  /* Buffer to store the  */
     int16_t bytes_recv = 0;
 
     int listen_s;
@@ -36,6 +35,7 @@ protected:
 
 public:
     explicit DataTransport(unsigned int port);
+    DataTransport(unsigned int port, uint8_t* buffer, uint16_t buffer_size);
     int16_t receive(bool timeout, struct sockaddr_in* addr= nullptr, socklen_t* addr_size= nullptr);
 
     int send(uint8_t msg, struct sockaddr_in* addr, const socklen_t* addr_size) const;
@@ -44,7 +44,7 @@ public:
 
     uint8_t* GetBuffer(uint8_t* buff, uint16_t* size);
     long long unsigned int* GetBuffer(long long unsigned int* buff, uint8_t* size);
-
+    uint16_t get_buffer();
     int set_timeout_len(unsigned int sec, unsigned int usec);
 };
 

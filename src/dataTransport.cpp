@@ -5,6 +5,8 @@
 #include "dataTransport.h"
 #include <iostream>
 
+#define BUFFER_LEN 1028  // Length of rx buffer
+
 /**********************************************************************************************************************
  * Public methods
  **********************************************************************************************************************/
@@ -12,22 +14,44 @@
 DataTransport::DataTransport(unsigned int port) {
     this->timeout_sec = 5;
     this->timeout_usec = 0;
+    this->p_buffer = new uint8_t[BUFFER_LEN];
     this->buffer_len = BUFFER_LEN;
     this->port = port;
 
     if(( this->s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP) )< 0)
     {
-        printf("Cannot create socket\n");
+        printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
     }
 
     if(( this->listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP) )< 0)
     {
-        printf("Cannot create socket\n");
+        printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
     }
 
     set_listen_addr();
 }
 
+/**********************************************************************************************************************/
+
+DataTransport::DataTransport(unsigned int port, uint8_t* buffer, uint16_t buffer_size){
+    this->timeout_sec = 5;
+    this->timeout_usec = 0;
+    this->p_buffer = buffer;
+    this->buffer_len = buffer_size;
+    this->port = port;
+
+    if(( this->s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP) )< 0)
+    {
+        printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
+    }
+
+    if(( this->listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP) )< 0)
+    {
+        printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
+    }
+
+    set_listen_addr();
+}
 
 /**********************************************************************************************************************/
 
@@ -42,7 +66,7 @@ int16_t DataTransport::receive(bool timeout, struct sockaddr_in* addr, socklen_t
             }
         }
 
-        this->bytes_recv = recvfrom(listen_s, this->buffer, this->buffer_len, 0, (struct sockaddr *)addr, addr_size);
+        this->bytes_recv = recvfrom(listen_s, p_buffer, this->buffer_len, 0, (struct sockaddr *)addr, addr_size);
         if(this->bytes_recv < 0){
             // ignore error
             continue;
@@ -56,8 +80,8 @@ int16_t DataTransport::receive(bool timeout, struct sockaddr_in* addr, socklen_t
         "Error happened, [datatransport.cpp, receive(struct sockaddr_in* addr, socklen_t* addr_size, bool timeout)]"
         << std::endl;
         for (int i = 0; i < this->bytes_recv; i++) {
-            std::cout << unsigned(*this->buffer) << std::endl;
-            this->buffer[i];
+            std::cout << unsigned(*p_buffer) << std::endl;
+            p_buffer[i];
         }
     }
     if(addr != nullptr){
@@ -86,7 +110,7 @@ int DataTransport::send(const long long unsigned int *msg, uint8_t msg_size, str
 /**********************************************************************************************************************/
 
 uint8_t* DataTransport::GetBuffer(uint8_t* buff, uint16_t* size){
-    buff = &this->buffer[0];
+    buff = &p_buffer[0];
     *size = this->bytes_recv;
     return buff;
 }
@@ -94,10 +118,18 @@ uint8_t* DataTransport::GetBuffer(uint8_t* buff, uint16_t* size){
 /**********************************************************************************************************************/
 
 long long unsigned int* DataTransport::GetBuffer(long long unsigned int* buff, uint8_t* size){
-    buff = (long long unsigned int*)&this->buffer[0];
+    buff = (long long unsigned int*)&p_buffer[0];
     *size = this->bytes_recv/ sizeof(long long unsigned int);
     return buff;
 }
+
+/**********************************************************************************************************************/
+
+uint16_t DataTransport::get_buffer() {
+    return bytes_recv;
+}
+
+/**********************************************************************************************************************/
 
 int DataTransport::set_timeout_len(unsigned int sec, unsigned int usec){
     if(sec > 60 or usec > 1000){
