@@ -18,7 +18,7 @@ UDP_client::UDP_client(char* host, unsigned int port, bool is_ip): DataTransport
 /**********************************************************************************************************************/
 
 UDP_client::UDP_client(char* host, unsigned int port, bool is_ip, uint8_t* buffer, uint16_t buffer_size):
-DataTransport(port, buffer, size) {
+DataTransport(port, buffer, buffer_size) {
 
 }
 
