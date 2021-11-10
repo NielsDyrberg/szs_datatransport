@@ -37,6 +37,7 @@ public:
      * @param is_ip[in] Defines if the @host is ip or hostname.
      */
     UDP_client(char* host, unsigned int port, bool is_ip);
+    UDP_client(char* host, unsigned int port, bool is_ip, uint8_t* buffer, uint16_t buffer_size);
 
     int16_t receive(bool timeout = false);
     int send(uint8_t msg);

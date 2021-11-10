@@ -17,6 +17,13 @@ UDP_client::UDP_client(char* host, unsigned int port, bool is_ip): DataTransport
 
 /**********************************************************************************************************************/
 
+UDP_client::UDP_client(char* host, unsigned int port, bool is_ip, uint8_t* buffer, uint16_t buffer_size):
+DataTransport(port, buffer, size) {
+
+}
+
+/**********************************************************************************************************************/
+
 int16_t UDP_client::receive(bool timeout) {
     if (!this->known_host){
         std::cout << "Host not known, [udp_client.cpp, receive(bool timeout)]" << std::endl;

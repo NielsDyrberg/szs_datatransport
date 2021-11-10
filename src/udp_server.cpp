@@ -14,6 +14,15 @@ UDP_server::UDP_server(unsigned int port): DataTransport(port) {
 
 /**********************************************************************************************************************/
 
+UDP_server::UDP_server(unsigned int port, uint8_t* buffer, uint16_t buffer_size): DataTransport(port, buffer, size) {
+    this->port_open = false;
+    this->known_client = false;
+    //ser_addr_size = 0;
+    cli_addr_size = 0;
+}
+
+/**********************************************************************************************************************/
+
 int16_t UDP_server::receive(bool timeout) {
     if (!this->port_open){
         this->open_port();
