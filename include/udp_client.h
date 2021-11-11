@@ -43,8 +43,10 @@ public:
     int send(uint8_t msg);
     int send(const uint8_t* msg, uint16_t msg_size);
     int send(const long long unsigned int *msg, uint8_t msg_size);
+    int send(uint16_t msg_size);
     int16_t send_and_receive(uint8_t msg);
     int16_t send_and_receive(uint8_t *msg, uint16_t size);
+    int16_t send_and_receive(uint16_t msg_size);
 };
 
 

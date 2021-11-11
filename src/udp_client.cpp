@@ -19,7 +19,13 @@ UDP_client::UDP_client(char* host, unsigned int port, bool is_ip): DataTransport
 
 UDP_client::UDP_client(char* host, unsigned int port, bool is_ip, uint8_t* buffer, uint16_t buffer_size):
 DataTransport(port, buffer, buffer_size) {
+    this->known_host = false;
 
+    this->ser_hostname = nullptr;
+    this->ser_ip = nullptr;
+    this->is_ip = is_ip;
+
+    setHost(host);
 }
 
 /**********************************************************************************************************************/
@@ -65,6 +71,16 @@ int UDP_client::send(const long long unsigned int *msg, uint8_t msg_size){
 
 /**********************************************************************************************************************/
 
+int UDP_client::send(uint16_t msg_size) {
+    if (!this->known_host){
+        std::cout << "Host not known, [udp_client.cpp, send(msg, msg_size, &ser_addr, &ser_addr_size)]" << std::endl;
+        return -1;
+    }
+    return DataTransport::send(p_buffer, msg_size, &ser_addr, &ser_addr_size);
+}
+
+/**********************************************************************************************************************/
+
 int16_t UDP_client::send_and_receive(uint8_t msg) {
     int16_t err;
     err = (int16_t)this->send(msg);
@@ -88,17 +104,37 @@ int16_t UDP_client::send_and_receive(uint8_t *msg, uint16_t size) {
     int16_t err;
     err = (int16_t)this->send(msg, size);
     if(err < 0){
-        std::cout << "Send failed" << std::endl;
+        std::cout << "Send failed, [udp_client.cpp, send_and_receive(uint8_t *msg, uint16_t size)]" << std::endl;
         return -1;
     }
 
     err = this->receive(true);
     if(err < 0){
-        std::cout << "Receive failed" << std::endl;
+        std::cout << "Receive failed, [udp_client.cpp, send_and_receive(uint8_t *msg, uint16_t size)]" << std::endl;
         return -2;
     }
 
     return err;
+}
+
+/**********************************************************************************************************************/
+
+int16_t UDP_client::send_and_receive(uint16_t msg_size) {
+    int16_t err;
+    err = (int16_t)this->send(p_buffer, msg_size);
+    if(err < 0){
+        std::cout << "Send failed, [udp_client.cpp, send_and_receive(uint8_t *msg, uint16_t size)]" << std::endl;
+        return -1;
+    }
+
+    err = this->receive(true);
+    if(err < 0){
+        std::cout << "Receive failed, [udp_client.cpp, send_and_receive(uint8_t *msg, uint16_t size)]" << std::endl;
+        return -2;
+    }
+
+    return err;
+
 }
 
 /**********************************************************************************************************************
