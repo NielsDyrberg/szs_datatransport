@@ -7,6 +7,9 @@
 
 #define BUFFER_LEN 1028  // Length of rx buffer
 
+int DataTransport::listen_s = 0;
+bool DataTransport::listen_socket_set = false;
+
 /**********************************************************************************************************************
  * Public methods
  **********************************************************************************************************************/
@@ -18,7 +21,6 @@ DataTransport::DataTransport() {
     this->buffer_len = 0;
     this->port = 0;
     this->s = 0;
-    this->listen_s = 0;
 }
 
 DataTransport::DataTransport(unsigned int port) {
@@ -33,12 +35,13 @@ DataTransport::DataTransport(unsigned int port) {
         printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
     }
 
-    if(( this->listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP) )< 0)
-    {
-        printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
+    if(!listen_socket_set) {
+        if ((listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP)) < 0) {
+            printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
+        }
+        set_listen_addr();
+        listen_socket_set = true;
     }
-
-    set_listen_addr();
 }
 
 /**********************************************************************************************************************/
@@ -55,12 +58,13 @@ DataTransport::DataTransport(unsigned int port, uint8_t* buffer, uint16_t buffer
         printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
     }
 
-    if(( this->listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP) )< 0)
-    {
-        printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
+    if(!listen_socket_set) {
+        if ((listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP)) < 0) {
+            printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
+        }
+        set_listen_addr();
+        listen_socket_set = true;
     }
-
-    set_listen_addr();
 }
 
 /**********************************************************************************************************************/
