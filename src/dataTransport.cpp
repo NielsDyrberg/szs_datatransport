@@ -11,6 +11,16 @@
  * Public methods
  **********************************************************************************************************************/
 
+DataTransport::DataTransport() {
+    this->timeout_sec = 0;
+    this->timeout_usec = 0;
+    this->p_buffer = nullptr;
+    this->buffer_len = 0;
+    this->port = 0;
+    this->s = 0;
+    this->listen_s = 0;
+}
+
 DataTransport::DataTransport(unsigned int port) {
     this->timeout_sec = 5;
     this->timeout_usec = 0;

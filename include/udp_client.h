@@ -29,6 +29,7 @@ private:
     int get_host_by_ip();
 
 public:
+    UDP_client();
     /**
      * Constructs a data-transport object.
      *

@@ -5,6 +5,13 @@
 #include "udp_client.h"
 #include <iostream>
 
+UDP_client::UDP_client(){
+    this->known_host = false;
+    this->ser_hostname = nullptr;
+    this->ser_ip = nullptr;
+    this->is_ip = false;
+}
+
 UDP_client::UDP_client(char* host, unsigned int port, bool is_ip): DataTransport(port) {
     this->known_host = false;
 

@@ -34,6 +34,7 @@ protected:
     int set_listen_addr() const;
 
 public:
+    DataTransport();
     explicit DataTransport(unsigned int port);
     DataTransport(unsigned int port, uint8_t* buffer, uint16_t buffer_size);
     int16_t receive(bool timeout, struct sockaddr_in* addr= nullptr, socklen_t* addr_size= nullptr);
