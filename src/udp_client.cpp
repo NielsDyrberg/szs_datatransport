@@ -27,11 +27,9 @@ UDP_client::UDP_client(char* host, unsigned int port, bool is_ip): DataTransport
 UDP_client::UDP_client(char* host, unsigned int port, bool is_ip, uint8_t* buffer, uint16_t buffer_size):
 DataTransport(port, buffer, buffer_size) {
     this->known_host = false;
-
     this->ser_hostname = nullptr;
     this->ser_ip = nullptr;
     this->is_ip = is_ip;
-
     setHost(host);
 }
 

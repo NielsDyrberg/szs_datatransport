@@ -14,13 +14,15 @@
 #define ADDRESS_FAMILY AF_INET // Address is an ip type
 #define SOCK_TYPE SOCK_DGRAM  // UDP
 
-
 class DataTransport{
 private:
     __time_t timeout_sec;
     __suseconds_t timeout_usec;
 
 protected:
+    static int listen_s;
+    static bool listen_socket_set;
+
     int s;  /* socket */
     unsigned int port;  /* Port to use */
 
@@ -28,12 +30,12 @@ protected:
     uint8_t* p_buffer;  /* Buffer to store the  */
     int16_t bytes_recv = 0;
 
-    int listen_s;
-
     int timeout_handler();
     int set_listen_addr() const;
 
 public:
+
+
     DataTransport();
     explicit DataTransport(unsigned int port);
     DataTransport(unsigned int port, uint8_t* buffer, uint16_t buffer_size);
