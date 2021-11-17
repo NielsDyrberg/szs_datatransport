@@ -3,6 +3,8 @@ To compile puml use: (Assuming plantuml you are in the directory)
 plantuml.jar -tsvg readme.md -o diagrams
 -->
 
+Version = 0.2.0
+
 A python module mainly building on sockets. 
 It is used to transport data between a server and clients, 
 for the SoundZone Protocol.
