@@ -5,7 +5,7 @@
 #include "udp_server.h"
 #include <iostream>
 
-UDP_server::UDP_server(unsigned int port): DataTransport(port) {
+UDP_server::UDP_server(dt_type_t type, unsigned int port): DataTransport(type, port) {
     this->port_open = false;
     this->known_client = false;
     //ser_addr_size = 0;
@@ -14,7 +14,7 @@ UDP_server::UDP_server(unsigned int port): DataTransport(port) {
 
 /**********************************************************************************************************************/
 
-UDP_server::UDP_server(unsigned int port, uint8_t* buffer, uint16_t buffer_size): DataTransport(port, buffer, buffer_size) {
+UDP_server::UDP_server(dt_type_t type, unsigned int port, uint8_t* buffer, uint16_t buffer_size): DataTransport(type, port, buffer, buffer_size) {
     this->port_open = false;
     this->known_client = false;
     //ser_addr_size = 0;

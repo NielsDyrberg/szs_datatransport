@@ -24,8 +24,8 @@ private:
     int open_port();
 
 public:
-    explicit UDP_server(unsigned int port);
-    UDP_server(unsigned int port, uint8_t* buffer, uint16_t buffer_size);
+    explicit UDP_server(dt_type_t type, unsigned int port);
+    UDP_server(dt_type_t type, unsigned int port, uint8_t* buffer, uint16_t buffer_size);
 
     int16_t receive(bool timeout = false);
 

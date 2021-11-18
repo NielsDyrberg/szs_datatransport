@@ -14,14 +14,23 @@
 #define ADDRESS_FAMILY AF_INET // Address is an ip type
 #define SOCK_TYPE SOCK_DGRAM  // UDP
 
+typedef enum {
+    SZP = 1,
+    SYNC = 2
+} dt_type_t;
+
 class DataTransport{
 private:
     __time_t timeout_sec;
     __suseconds_t timeout_usec;
 
 protected:
-    static int listen_s;
-    static bool listen_socket_set;
+    int* listen_s;
+    bool* listen_socket_set;
+    static int listen_s_1;
+    static bool listen_socket_set_1;
+    static int listen_s_2;
+    static bool listen_socket_set_2;
 
     int s;  /* socket */
     unsigned int port;  /* Port to use */
@@ -37,8 +46,8 @@ public:
 
 
     DataTransport();
-    explicit DataTransport(unsigned int port);
-    DataTransport(unsigned int port, uint8_t* buffer, uint16_t buffer_size);
+    explicit DataTransport(dt_type_t type, unsigned int port);
+    DataTransport(dt_type_t type, unsigned int port, uint8_t* buffer, uint16_t buffer_size);
     int16_t receive(bool timeout, struct sockaddr_in* addr= nullptr, socklen_t* addr_size= nullptr);
 
     int send(uint8_t msg, struct sockaddr_in* addr, const socklen_t* addr_size) const;

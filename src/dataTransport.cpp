@@ -7,8 +7,10 @@
 
 #define BUFFER_LEN 1028  // Length of rx buffer
 
-int DataTransport::listen_s = 0;
-bool DataTransport::listen_socket_set = false;
+int DataTransport::listen_s_1 = 0;
+bool DataTransport::listen_socket_set_1 = false;
+int DataTransport::listen_s_2 = 0;
+bool DataTransport::listen_socket_set_2 = false;
 
 /**********************************************************************************************************************
  * Public methods
@@ -23,7 +25,7 @@ DataTransport::DataTransport() {
     this->s = 0;
 }
 
-DataTransport::DataTransport(unsigned int port) {
+DataTransport::DataTransport(dt_type_t type, unsigned int port) {
     this->timeout_sec = 5;
     this->timeout_usec = 0;
     this->p_buffer = new uint8_t[BUFFER_LEN];
@@ -35,18 +37,26 @@ DataTransport::DataTransport(unsigned int port) {
         printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
     }
 
-    if(!listen_socket_set) {
-        if ((listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP)) < 0) {
+    if(type == SZP){
+        listen_s = &listen_s_1;
+        listen_socket_set = &listen_socket_set_1;
+    } else if (type == SYNC){
+        listen_s = &listen_s_2;
+        listen_socket_set = &listen_socket_set_2;
+    }
+
+    if(!*listen_socket_set) {
+        if ((*listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP)) < 0) {
             printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
         }
         set_listen_addr();
-        listen_socket_set = true;
+        *listen_socket_set = true;
     }
 }
 
 /**********************************************************************************************************************/
 
-DataTransport::DataTransport(unsigned int port, uint8_t* buffer, uint16_t buffer_size){
+DataTransport::DataTransport(dt_type_t type, unsigned int port, uint8_t* buffer, uint16_t buffer_size){
     this->timeout_sec = 5;
     this->timeout_usec = 0;
     this->p_buffer = buffer;
@@ -58,12 +68,20 @@ DataTransport::DataTransport(unsigned int port, uint8_t* buffer, uint16_t buffer
         printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
     }
 
-    if(!listen_socket_set) {
-        if ((listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP)) < 0) {
+    if(type == SZP){
+        listen_s = &listen_s_1;
+        listen_socket_set = &listen_socket_set_1;
+    } else if (type == SYNC){
+        listen_s = &listen_s_2;
+        listen_socket_set = &listen_socket_set_2;
+    }
+
+    if(!*listen_socket_set) {
+        if ((*listen_s = socket(ADDRESS_FAMILY, SOCK_TYPE, IPPROTO_UDP)) < 0) {
             printf("Cannot create socket, [DataTransport.cpp, DataTransport()]\n");
         }
         set_listen_addr();
-        listen_socket_set = true;
+        *listen_socket_set = true;
     }
 }
 
@@ -80,7 +98,7 @@ int16_t DataTransport::receive(bool timeout, struct sockaddr_in* addr, socklen_t
             }
         }
 
-        this->bytes_recv = recvfrom(listen_s, p_buffer, this->buffer_len, 0, (struct sockaddr *)addr, addr_size);
+        this->bytes_recv = recvfrom(*listen_s, p_buffer, this->buffer_len, 0, (struct sockaddr *)addr, addr_size);
         if(this->bytes_recv < 0){
             // ignore error
             continue;
@@ -169,13 +187,13 @@ int DataTransport::timeout_handler() {
 
     /* Watch stdin (fd 0) to see when it has input. */
     FD_ZERO(&set);
-    FD_SET(listen_s, &set);
+    FD_SET(*listen_s, &set);
 
     /* Wait up to five seconds. */
     tv.tv_sec = timeout_sec;
     tv.tv_usec = timeout_usec;
 
-    retval = select(listen_s+1, &set, nullptr, nullptr, &tv);
+    retval = select(*listen_s+1, &set, nullptr, nullptr, &tv);
     /* Don't rely on the value of tv now! */
 
     if (retval == -1){
@@ -204,7 +222,7 @@ int DataTransport::set_listen_addr() const {
     tmp_listen_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // Bind the socket with the server address
-    if ( bind(listen_s, (const struct sockaddr *)&tmp_listen_addr, sizeof(tmp_listen_addr)) < 0 )
+    if ( bind(*listen_s, (const struct sockaddr *)&tmp_listen_addr, sizeof(tmp_listen_addr)) < 0 )
     {
         perror("bind failed, [dataTransport.cpp, set_listen_addr()]");
         exit(EXIT_FAILURE);
