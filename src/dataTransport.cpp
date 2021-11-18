@@ -97,16 +97,13 @@ int16_t DataTransport::receive(bool timeout, struct sockaddr_in* addr, socklen_t
                 break;
             }
         }
-
         this->bytes_recv = recvfrom(*listen_s, p_buffer, this->buffer_len, 0, (struct sockaddr *)addr, addr_size);
         if(this->bytes_recv < 0){
             // ignore error
             continue;
         }
-
         break;
     }
-
     if (this->bytes_recv < 0){
         std::cout <<
         "Error happened, [datatransport.cpp, receive(struct sockaddr_in* addr, socklen_t* addr_size, bool timeout)]"
@@ -128,6 +125,7 @@ int DataTransport::send(uint8_t msg, struct sockaddr_in* addr, const socklen_t* 
     return sendto(s , &msg , sizeof(uint8_t), 0, (struct sockaddr*)addr, *addr_size);
 }
 
+/**********************************************************************************************************************/
 
 int DataTransport::send(const uint8_t* msg, uint16_t msg_size, struct sockaddr_in* addr, const socklen_t* addr_size) const{
     return sendto(s , msg , msg_size, 0, (struct sockaddr*)addr, *addr_size);
@@ -180,6 +178,13 @@ int DataTransport::set_timeout_len(unsigned int sec, unsigned int usec){
  * Private methods
  **********************************************************************************************************************/
 
+/**
+ * Handler for timeout.
+ * @return int
+ * @retval 0 If data is available within time.
+ * @retval -1 If unsuccessfully selected fd to track.
+ * @retval -2 If timeout occured.
+ */
 int DataTransport::timeout_handler() {
     struct timeval tv{};
     fd_set set;
@@ -211,6 +216,10 @@ int DataTransport::timeout_handler() {
     }
 }
 
+/**
+ * Sets listen_addr. Can only be done once as listen_s is static.
+ * @return 0.
+ */
 int DataTransport::set_listen_addr() const {
     struct sockaddr_in tmp_listen_addr{};
 
