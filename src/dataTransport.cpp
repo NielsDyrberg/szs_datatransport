@@ -1,13 +1,8 @@
 /***********************************************************************************************************************
- * Name: DataTransport (Implementation)
- *
- * File: dataTransport.cpp
- *
- * Author:
- *      Niels Dyrberg
- *
- * Date:
- *      21-10-2021
+ * @name DataTransport
+ * @file dataTransport.cpp
+ * @author Niels Dyrberg
+ * @date 21-10-2021
  *
  * Purpose:
  *      Implement DataTransport class

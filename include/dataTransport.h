@@ -1,19 +1,13 @@
 /***********************************************************************************************************************
- * Name: DataTransport
- *
- * File: dataTransport.h
- *
- * Author:
- *      Niels Dyrberg
- *
- * Date:
- *      21-10-2021
+ * @name DataTransport
+ * @file dataTransport.h
+ * @author Niels Dyrberg
+ * @date 21-10-2021
  *
  * Purpose:
  *      Transport an array of bytes from one machine to another.
  *
- * Notes:
- *      Is written as a base-class for UDP_server and UDP_client.
+ * @note Is written as a base-class for UDP_server and UDP_client.
  **********************************************************************************************************************/
 
 #ifndef C_SOUNDZONE_CLIENT_DATATRANSPORT_H
@@ -45,6 +39,10 @@ typedef enum {
     SYNC = 2
 } dt_type_t;
 
+/**********************************************************************************************************************
+ * Class declaration
+ **********************************************************************************************************************/
+
 class DataTransport {
 private:
     __time_t timeout_sec;
@@ -66,6 +64,7 @@ protected:
     int16_t bytes_recv = 0;
 
     int timeout_handler();
+
     int set_listen_addr() const;
 
 public:
@@ -77,8 +76,8 @@ public:
 
     /**
      * @brief Constructor for DataTransport
-     * @param type Is it for SZP of SYNC.
-     * @param port The port to use.
+     * @param type[in] Is it for SZP of SYNC.
+     * @param port[in] The port to use.
      */
     explicit DataTransport(dt_type_t type, unsigned int port);
 
@@ -86,18 +85,18 @@ public:
      * @brief Constructor for DataTransport
      * @details When using this an external buffer is used. This eases up the process of retrieving the data from
      * DataTransport.
-     * @param type Is it for SZP of SYNC.
-     * @param port The port to use.
-     * @param buffer Pointer to an external buffer.
-     * @param buffer_size The size of #buffer.
+     * @param type[in] Is it for SZP of SYNC.
+     * @param port[in] The port to use.
+     * @param buffer[in] Pointer to an external buffer.
+     * @param buffer_size[in] The size of #buffer.
      */
     DataTransport(dt_type_t type, unsigned int port, uint8_t *buffer, uint16_t buffer_size);
 
     /**
      * @brief Receives data and saves the incoming ip.
-     * @param timeout Decide if the receive function should timeout. If true it returns after timeout, if false it hangs.
-     * @param addr The address of the sender.
-     * @param addr_size The size of #addr.
+     * @param timeout[in] Decide if the receive function should timeout. If true it returns after timeout, if false it hangs.
+     * @param addr[in] The address of the sender.
+     * @param addr_size[in] The size of #addr.
      * @return int16_t.
      * @retval -1 if error.
      * @retval size of the received msg if successful.
@@ -106,9 +105,9 @@ public:
 
     /**
      * @brief Sends #msg to #addr.
-     * @param msg Byte to send.
-     * @param addr The address of the receiver.
-     * @param addr_size The size of #addr.
+     * @param msg[in] Byte to send.
+     * @param addr[in] The address of the receiver.
+     * @param addr_size[in] The size of #addr.
      * @return int
      * @retval -1 if errors
      * @retval The number of bytes sent if successfully.
@@ -117,10 +116,10 @@ public:
 
     /**
      * @brief Sends #msg to #addr.
-     * @param msg Pointer to the array that should be sent.
-     * @param msg_size Size of #msg
-     * @param addr The address of the receiver.
-     * @param addr_size The size of #addr.
+     * @param msg[in] Pointer to the array that should be sent.
+     * @param msg_size[in] Size of #msg
+     * @param addr[in] The address of the receiver.
+     * @param addr_size[in] The size of #addr.
      * @return int
      * @retval -1 if errors
      * @retval The number of bytes sent if successfully.
@@ -129,10 +128,10 @@ public:
 
     /**
      * @brief Sends #msg to #addr.
-     * @param msg Pointer to the array that should be sent.
-     * @param msg_size Size of #msg IN BYTES!!
-     * @param addr The address of the receiver.
-     * @param addr_size The size of #addr.
+     * @param msg[in] Pointer to the array that should be sent.
+     * @param msg_size[in] Size of #msg IN BYTES!!
+     * @param addr[in] The address of the receiver.
+     * @param addr_size[in] The size of #addr.
      * @return int
      * @retval -1 if errors
      * @retval The number of bytes sent if successfully.
@@ -143,31 +142,31 @@ public:
     /**
      * @brief Used to get pointers to the communication buffer.
      * @details If an external buffer is used, consider using get_buffer().
-     * @param buff Pointer to the communication buffer.
-     * @param size Will carry the number of bytes received.
+     * @param buff[out] Pointer to the communication buffer.
+     * @param size[out] Will carry the number of bytes received.
      * @return Pointer to the communication buffer.
      */
     uint8_t *GetBuffer(uint8_t *buff, uint16_t *size);
 
     /**
      * @brief Used to get pointers to the communication buffer.
-     * @param buff Pointer to the communication buffer.
-     * @param size Will carry the number of bytes received.
+     * @param buff[out] Pointer to the communication buffer.
+     * @param size[out] Will carry the number of bytes received.
      * @return Pointer to the communication buffer.
      */
     long long unsigned int *GetBuffer(long long unsigned int *buff, uint8_t *size);
 
     /**
-     * Getter for #bytes_recv.
+     * @brief Getter for #bytes_recv.
      * @return #bytes_recv.
      */
     uint16_t get_buffer();
 
     /**
-     * Setter for the timeout lengths.
+     * @brief Setter for the timeout lengths.
      * @details The two values are added (sec + usec*10^-6).
-     * @param sec Seconds to timeout.
-     * @param usec Micro-seconds to timeout.
+     * @param sec[in] Seconds to timeout.
+     * @param usec[in] Micro-seconds to timeout.
      * @return int
      * @retval -1 If error
      * @retval 0 If successful update.
