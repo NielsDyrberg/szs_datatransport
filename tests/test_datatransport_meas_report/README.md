@@ -38,8 +38,9 @@ server -> client_1: ping
 server <- client_1: ping_ack
 server -> client_2: ping
 server <- client_2: ping_ack
-server -> client_N: ping
-server <- client_N: ping_ack
+...
+server -> client_8: ping
+server <- client_8: ping_ack
 @enduml
 ```
 -->
