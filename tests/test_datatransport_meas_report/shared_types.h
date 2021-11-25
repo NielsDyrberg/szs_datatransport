@@ -7,6 +7,9 @@
 
 #include <cstdint>
 
+#define PING_REQUEST (uint8_t) 0xAA
+#define PING_RESPONSE (uint8_t) 0xBB
+
 enum cid_t : uint8_t {
     package_start = 0x01,
     package_end = 0x02,

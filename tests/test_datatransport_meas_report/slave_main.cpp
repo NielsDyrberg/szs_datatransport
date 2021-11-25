@@ -10,29 +10,23 @@ int port = 1695;
 const uint16_t buffer_size = 4096;
 uint8_t comm_buffer[buffer_size];
 
-void receive_5mb(){
+[[noreturn]] void receive_and_responde_ping(){
     uint16_t size;
 
     UDP_server dt(SZP, port, comm_buffer, buffer_size);
 
-    while () {
-        if (dt.receive(false) > 0) {
-            size = dt.get_buffer();
-            if (comm_buffer[0] == 0x45) {
-                dt.send(msg, sizeof(msg));
+    while (true) {
+        size = dt.receive();
+        if(size == 1){
+            if (comm_buffer[0] == PING_REQUEST) {
+                dt.send(PING_RESPONSE);
             }
-            for (int i = 0; i < size; i++) {
-                std::cout << unsigned(comm_buffer[i]) << std::endl;
-            }
-            std::cout << "data" << std::endl;
-        } else{
-            std::cout << "Client rerun" << std::endl;
         }
+        std::cout << "Client rerun" << std::endl;
     }
 }
 
 int main(){
-
-
+    receive_and_responde_ping();
     return 0;
 }
