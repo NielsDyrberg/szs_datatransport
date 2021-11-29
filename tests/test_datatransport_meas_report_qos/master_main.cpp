@@ -11,11 +11,11 @@
 #include "shared_types.h"
 
 #define TEST_CIRCLES 200
-#define NUMBER_OF_SLAVES 1
+#define NUMBER_OF_SLAVES 8
 #define PORT 1695
 
-static char* slave_ips[] = {"192.168.1.47", nullptr, nullptr, nullptr,
-                            nullptr, nullptr, nullptr, nullptr};
+static char* slave_ips[] = {"192.168.0.131", "192.168.0.132", "192.168.0.133", "192.168.0.100",
+                            "192.168.0.103", "192.168.0.105", "192.168.0.104", "192.168.0.106"};
 const uint16_t buffer_size = 4096;
 uint8_t comm_buffer[buffer_size];
 UDP_client* slaves;

@@ -13,7 +13,8 @@ import subprocess
 from threading import Thread
 
 block_size = {"4096", "2048", "1024", "512", "256", "128", "64"}
-hosts = ["192.168.1.47", "192.168.1.46"]
+hosts = ["192.168.0.131", "192.168.0.132", "192.168.0.133", "192.168.0.100",
+         "192.168.0.103", "192.168.0.105", "192.168.0.104", "192.168.0.106", "192.168.0.130"]
 
 root_scr_path = "/tmp/szs_datatransport"
 scr_path = "/tmp/szs_datatransport/tests/test_datatransport_meas_report_qos_opt"
@@ -29,7 +30,7 @@ def execute_tests():
     for host in hosts:
         ssh.append(paramiko.SSHClient())
         ssh[i].load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-        ssh[i].connect(host, username="ncpd", password="fantacola")
+        ssh[i].connect(host, username="pi", password="fantacola")
         transport.append(ssh[i].get_transport())
         channel.append(transport[i].open_session())
 
@@ -48,7 +49,7 @@ def build_projects():
     for host in hosts:
         ssh = paramiko.SSHClient()
         ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-        ssh.connect(host, username="ncpd", password="fantacola")
+        ssh.connect(host, username="pi", password="fantacola")
         print("---")
         print("cmake")
         print("---")
@@ -68,7 +69,7 @@ def build_projects():
 
 def upload_files():
     for host in hosts:
-        subprocess.run("scp -r " + ROOT_DIR + " ncpd@" + host + ":/tmp/")
+        subprocess.run("scp -r " + ROOT_DIR + " pi@" + host + ":/tmp/")
 
 
 def create_test_files():

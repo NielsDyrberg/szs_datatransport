@@ -28,8 +28,8 @@ uint8_t buffer[buffer_size] = {0};
 FILE* file_fd;
 
 UDP_client* slaves;
-static char* slave_ips[] = {"192.168.1.47", nullptr, nullptr, nullptr,
-                            nullptr, nullptr, nullptr, nullptr};
+static char* slave_ips[] = {"192.168.0.131", "192.168.0.132", "192.168.0.133", "192.168.0.100",
+                            "192.168.0.103", "192.168.0.105", "192.168.0.104", "192.168.0.106"};
 long long int play_time = 0;
 
 const int iterations = n_block_size * n_send_delay;
