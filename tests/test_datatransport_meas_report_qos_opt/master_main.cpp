@@ -15,7 +15,7 @@
  * Defines
  **********************************************************************************************************************/
 
-#define NUMBER_OF_SLAVES 1
+#define NUMBER_OF_SLAVES 8
 #define PORT 1695
 
 /***********************************************************************************************************************
@@ -88,6 +88,7 @@ void open_file(int block_i){
         std::cout << "Did not load song, [SZS_server, load_song(char *song_path)]" << std::endl;
         exit(1);
     }
+    std::cout << "file opened: " << c_file_path << std::endl;
 }
 
 int add_slave(int slave_number) {
@@ -115,9 +116,8 @@ void save_data(){
 }
 
 void run_all_test_iterations(){
-
-    for (int i = 0; i < n_block_size; i++) {
-        for (int j = 0; j < n_send_delay; j++) {
+    for (int j = 0; j < n_send_delay; j++) {
+        for (int i = 0; i < n_block_size; i++) {
             open_file(i);
             send_file(i, j);
 
