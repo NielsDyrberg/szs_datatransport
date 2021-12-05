@@ -18,8 +18,8 @@ int block_size[] = {4096, 2048, 1024, 512, 256, 128, 64};
 std::string block_size_char[] = {"4096", "2048", "1024", "512", "256", "128", "64"};
 const int n_block_size = sizeof(block_size)/ sizeof(int);
 
-int send_delay[] = {0, 20, 50, 70, 100, 130};
-std::string send_delay_char[] = {"0", "20", "50", "70", "100", "130"};
+int send_delay[] = {150, 130, 100, 70, 50, 20};
+std::string send_delay_char[] = {"150", "130", "100", "70", "50", "20"};
 const int n_send_delay = sizeof(send_delay)/ sizeof(int);
 
 std::string test_files_path = "/tmp/szs_datatransport/tests/test_datatransport_meas_report_qos_opt/test_files/";

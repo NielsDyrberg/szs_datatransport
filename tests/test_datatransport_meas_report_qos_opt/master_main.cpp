@@ -108,7 +108,7 @@ void save_data(){
 
     f.open("/tmp/measured_qos_opt_data.csv", std::ios::out);
 
-    for (int i = 0; i < iterations - 1; i++) {
+    for (int i = 0; i < iterations; i++) {
         f << measured_data[i] << ", ";
     }
 

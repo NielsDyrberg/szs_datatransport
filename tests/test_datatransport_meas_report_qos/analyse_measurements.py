@@ -16,33 +16,25 @@ NUMBER_OF_SLAVES = 8
 
 def plot_data(data):
 
-    fig, ax = plt.subplots()
-
+    plt.rc('axes', labelsize=20)
     # make dataframe
     df = pd.DataFrame(data, columns=["1", "2", "3", "4", "5", "6", "7", "8"])
-    ax = df.boxplot(column=["1", "2", "3", "4", "5", "6", "7", "8"], figsize=(500, 5), grid=False, fontsize=15, rot=45,
+    ax = df.boxplot(column=["1", "2", "3", "4", "5", "6", "7", "8"], figsize=(500, 5), grid=False, fontsize=20, rot=0,
                     showfliers=False)
 
     # plot
-    ax.set_title('Boxplot of round-trip time [us]')
+    # ax.set_title('Boxplot of round-trip time [us]')
     ax.set_xlabel('Pi\'s #')
-    ax.set_ylabel('Round-trip time')
+    ax.set_ylabel('Round-trip time [us]')
+
     plt.show()
 
 
 def do_statistics(data):
-    min_delays = []
-    max_delays = []
-    mean_delays = []
-
-    for i in range(0, NUMBER_OF_SLAVES):
-        min_delays.append(data[:, i].min())
-        max_delays.append(data[:, i].max())
-        mean_delays.append(data[:, i].mean())
-
-    print(min_delays, max_delays, mean_delays)
-    plot_data(data)
-    return None
+    print("Min: {}".format(data.min()))
+    print("Max: {}".format(data.max()))
+    print("Mean: {}".format(data.mean()))
+    print("Jitter: {}".format(data.max()-data.min()))
 
 
 def retrieve_measured_data():
@@ -54,6 +46,7 @@ def retrieve_measured_data():
 def main():
     in_data = retrieve_measured_data()
     do_statistics(in_data)
+    plot_data(in_data)
     pass
 
 
