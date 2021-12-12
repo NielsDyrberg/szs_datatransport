@@ -90,6 +90,7 @@ public:
      * @param type[in] Is it for SZP of SYNC.
      * @param port[in] The port to use.
      */
+    [Obsolete("This constructor is obsolete, use DataTransport(dt_type_t, unsigned int, uint8_t *, uint16_t)")]
     explicit DataTransport(dt_type_t type, unsigned int port);
 
     /**
