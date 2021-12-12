@@ -118,11 +118,6 @@ class socket {
     + close()
 }
 
-note right of socket::SOCK_DGRAM
-    UDP
-end note
-
-
 @enduml
 ```
 -->

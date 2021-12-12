@@ -85,12 +85,6 @@ int UDP_server::send(uint16_t msg_size) {
  * Private methods
  **********************************************************************************************************************/
 
-/**
- * @details Opens the port for listening.
- * @note !!Disclaimer!! This does not open the port anymore, but now just prepares #cli_addr for writting. But it is
- * still here to tie everything else together.
- * @return 0.
- */
 int UDP_server::open_port() {
     bzero(&cli_addr, sizeof(cli_addr));
     cli_addr_size = sizeof(cli_addr);

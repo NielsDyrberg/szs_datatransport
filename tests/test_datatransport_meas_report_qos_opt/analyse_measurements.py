@@ -201,7 +201,7 @@ def calculate_throughput(path_to_file, parameters):
     for delay in send_delay:
         for block in block_size:
             try:
-                trans = (FILE_SIZE*8) / (int(elements[i])/1000)  # Transmission rate [Bytes/s]
+                trans = ((FILE_SIZE*8) / 10**6) / (int(elements[i])/1000000)  # Transmission rate [Bytes/s]
                 parameters.throughput.append([delay, block, trans])
             except ValueError:
                 parameters.throughput.append([delay, block, 0])
@@ -269,10 +269,11 @@ def plot_throughput(in_data):
 
     plt.style.use("seaborn")
     # 3. Plot the heatmap
-    plt.figure(figsize=(10, 10))
-    heat_map = sns.heatmap(result, linewidth=1, annot=True, fmt='.0f', cmap="YlGnBu",
-                           cbar_kws={'label': 'Throughput [Bytes/s]'})
-    plt.show()
+    plt.figure(figsize=(12, 7))
+    heat_map = sns.heatmap(result, linewidth=1, annot=True, fmt='.2f', cmap="YlGnBu",
+                           cbar_kws={'label': 'Throughput [MB/s]'})
+    # plt.show()
+    plt.savefig('diagrams/throughput.png')
 
 
 def plot_byte_loss(in_data):
@@ -296,15 +297,102 @@ def plot_byte_loss(in_data):
     # Plot
     plt.style.use("seaborn")
     # 3. Plot the heatmap
-    plt.figure(figsize=(10, 10))
-    heat_map = sns.heatmap(result, linewidth=1, annot=True, fmt='.0f', cmap="YlGnBu",
-                           cbar_kws={'label': 'Bytes dropped'})
-    plt.show()
+    plt.figure(figsize=(12, 7))
+    ax = sns.heatmap(result, linewidth=1, annot=True, fmt='.0f', cmap="YlGnBu",
+                     cbar_kws={'label': 'Bytes dropped'})
+    ax.set_xlabel('block_size [Bytes]')
+    ax.set_ylabel('send_delay [us]')
+    # plt.show()
+    plt.savefig('diagrams/byte_loss.png')
+
+
+def plot_file_corruption(in_data):
+    tmp_data = in_data
+    raw_list = []
+    for file in tmp_data.files:
+        # 'N/a' are counted as dropped the whole file
+        raw_list.append([file.send_delay, file.block_size, file.correct_hashes])
+
+    counted_list = []
+    for element in raw_list:
+        length = element[2].__len__()
+        if length == 0:
+            permil = 0
+        else:
+            n_true = sum(element[2])
+            permil = 1000 - round(n_true/length * 1000)
+        counted_list.append([element[0], element[1], permil])
+
+    # Create dataframe from raw_list
+    df = pd.DataFrame(counted_list, columns=["send_delay", "block_size", "permil"])
+
+    # Sum all dropped bytes.
+    summed_list = df.groupby(['send_delay', 'block_size']).sum().reset_index()
+
+    # normalize values after sum
+    summed_list['permil'] = summed_list['permil'] / 8
+
+    # Create pivot
+    result = summed_list.pivot(index='send_delay', columns='block_size', values='permil')
+
+    # Plot
+    plt.style.use("seaborn")
+    # 3. Plot the heatmap
+    plt.figure(figsize=(12, 7))
+    ax = sns.heatmap(result, linewidth=1, annot=True, fmt='.0f', cmap="YlGnBu",
+                     cbar_kws={'label': 'Corruptness in permil'})
+    ax.set_xlabel('block_size [Bytes]')
+    ax.set_ylabel('send_delay [us]')
+    # plt.show()
+    plt.savefig('diagrams/file_corruptness.png')
+
+
+def plot_package_order_correctness(in_data):
+    tmp_data = in_data
+    raw_list = []
+    for file in tmp_data.files:
+        # 'N/a' are counted as dropped the whole file
+        raw_list.append([file.send_delay, file.block_size, file.correct_order])
+
+    counted_list = []
+    for element in raw_list:
+        length = element[2].__len__()
+        if length == 0:
+            permil = 0
+        else:
+            n_true = sum(element[2])
+            permil = round(n_true/length * 1000)
+        counted_list.append([element[0], element[1], permil])
+
+    # Create dataframe from raw_list
+    df = pd.DataFrame(counted_list, columns=["send_delay", "block_size", "permil"])
+
+    # Sum all dropped bytes.
+    summed_list = df.groupby(['send_delay', 'block_size']).sum().reset_index()
+
+    # normalize values after sum
+    summed_list['permil'] = summed_list['permil'] / 8
+
+    # Create pivot
+    result = summed_list.pivot(index='send_delay', columns='block_size', values='permil')
+
+    # Plot
+    plt.style.use("seaborn")
+    # 3. Plot the heatmap
+    plt.figure(figsize=(12, 7))
+    ax = sns.heatmap(result, linewidth=1, annot=True, fmt='.0f', cmap="YlGnBu",
+                     cbar_kws={'label': 'Correct order in permil'})
+    ax.set_xlabel('block_size [Bytes]')
+    ax.set_ylabel('send_delay [us]')
+    # plt.show()
+    plt.savefig('diagrams/byte_order.png')
 
 
 def analyze_data(data):
-    # plot_throughput(np.array(data.throughput, dtype=int))
+    plot_throughput(np.array(data.throughput, dtype=float))
     plot_byte_loss(data)
+    plot_file_corruption(data)
+    plot_package_order_correctness(data)
 
 
 def get_path_to_files():

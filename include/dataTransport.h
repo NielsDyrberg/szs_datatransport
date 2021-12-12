@@ -63,8 +63,19 @@ protected:
     uint8_t *p_buffer;  /* Buffer to store the  */
     int16_t bytes_recv = 0;
 
+    /**
+     * Handler for timeout.
+     * @return int
+     * @retval 0 If data is available within time.
+     * @retval -1 If unsuccessfully selected fd to track.
+     * @retval -2 If timeout occured.
+     */
     int timeout_handler();
 
+    /**
+     * Sets listen_addr. Can only be done once as listen_s is static.
+     * @return 0.
+     */
     int set_listen_addr() const;
 
 public:
