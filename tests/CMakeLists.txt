@@ -1,3 +1,5 @@
 
 #add_subdirectory(test_dt_master)
 #add_subdirectory(test_dt_client)
+add_subdirectory(test_datatransport_meas_report_qos)
+add_subdirectory(test_datatransport_meas_report_qos_opt)

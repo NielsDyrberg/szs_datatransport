@@ -35,6 +35,12 @@ private:
     struct sockaddr_storage cli_storage{}; /* - */
     socklen_t cli_addr_size; /* Size of the address data */
 
+    /**
+     * @details Opens the port for listening.
+     * @note !!Disclaimer!! This does not open the port anymore, but now just prepares #cli_addr for writting. But it is
+     * still here to tie everything else together.
+     * @return 0.
+     */
     int open_port();
 
 public:

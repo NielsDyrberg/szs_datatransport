@@ -163,11 +163,6 @@ int16_t UDP_client::send_and_receive(uint16_t msg_size) {
  * Private methods
  **********************************************************************************************************************/
 
-/**
- * Sets the host variables, depending on if the host var is ip or hostname
- * @param host[in] Either ip or hostname of the host.
- * @return None
- */
 int UDP_client::setHost(char *host) {
     int err;
 
@@ -190,12 +185,8 @@ int UDP_client::setHost(char *host) {
     return 0;
 }
 
-/**
- * @brief It prepares #ser_addr so it can be used for connection to the server.
- * @return int
- * @retval -1 If errors
- * @retval 0 If successful.
- */
+/**********************************************************************************************************************/
+
 int UDP_client::get_host_by_ip() {
     if (ser_ip == nullptr) { return -1; }  // Return error if ip is not set
 

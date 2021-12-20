@@ -39,8 +39,19 @@ private:
     struct sockaddr_storage ser_storage{};  /* - */
     socklen_t ser_addr_size{};  /* Size of the address data */
 
+    /**
+     * Sets the host variables, depending on if the host var is ip or hostname
+     * @param host[in] Either ip or hostname of the host.
+     * @return None
+     */
     int setHost(char *host);
 
+    /**
+     * @brief It prepares #ser_addr so it can be used for connection to the server.
+     * @return int
+     * @retval -1 If errors
+     * @retval 0 If successful.
+     */
     int get_host_by_ip();
 
 public:
